@@ -20,7 +20,7 @@ def main():
     print(answer_mse)
 
     # дальше создаём сортированный массив уникальных значений
-    sorted_set_elements = sorted(set(selection_elements))
+    sorted_set_elements = __quicksort__(list(set(selection_elements)))
     # используем его для поиска минимального абсолютного отклонения
     mae = calculate_mae(selection_elements, sorted_set_elements[0])
     answer_mae = sorted_set_elements[0]
@@ -73,6 +73,15 @@ def __relative_difference_list__(list1: list, list2: list) -> list:
     for i in range(len(list1)):
         relative_difference[i] = (list1[i] - list2[i])/list1[i]
     return relative_difference
+
+def __quicksort__(arr):
+    if len(arr) <= 1:
+        return arr
+    else:
+        pivot = arr[0]
+        less = [x for x in arr[1:] if x <= pivot]
+        greater = [x for x in arr[1:] if x > pivot]
+        return __quicksort__(less) + [pivot] + __quicksort__(greater)
 
 if __name__ == '__main__':
 	main()
