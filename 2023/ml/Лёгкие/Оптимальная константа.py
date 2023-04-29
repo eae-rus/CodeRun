@@ -6,7 +6,7 @@ def main():
     MSE можно найти за счёт математических преобразований (производной) как:
     - среднее арифметическое входных чисел делённое на число элементов
     MAE и MAPE будем искать за счёт:
-    - минимального отклонения MAE и MAPE по массиву уникальных чисел
+    - минимального отклонения MAE и MAPE по массиву уникальных чисел от меньшего
     *Примечание: последнее утверждение является не проверенной гипотизой
     '''
     sample_size = int(input())
@@ -21,23 +21,35 @@ def main():
 
     # дальше создаём сортированный массив уникальных значений
     set_elements = list(set(selection_elements))
-    # используем его для поиска минимального абсолютного отклонения
-    mae = calculate_mae(selection_elements, set_elements[0])
-    answer_mae = set_elements[0]
-    for elemet in set_elements[1:]:
-        new_mae = calculate_mae(selection_elements, elemet)
-        if new_mae < mae:
-            mae = new_mae
-            answer_mae = elemet
+    # используем его для поиска MAE и MAPE
+    min_elements = min(set_elements)
+    set_elements.remove(min_elements)
+    
+    mae = calculate_mae(selection_elements, min_elements)  
+    answer_mae = min_elements
+    is_finded_answer_mae = False
+    mape = calculate_mape(selection_elements, min_elements)
+    answer_mape = min_elements
+    is_finded_answer_mape = False
+    
+    while (len(set_elements) > 0) and (not is_finded_answer_mae) and (not is_finded_answer_mape):
+        min_elements = min(set_elements)
+        if not is_finded_answer_mae:
+            new_mae = calculate_mae(selection_elements, min_elements)
+            if new_mae < mae:
+                mae = new_mae
+                answer_mae = min_elements
+            else:
+                is_finded_answer_mae = True
+        if not is_finded_answer_mape:
+            new_mape = calculate_mape(selection_elements, min_elements)
+            if new_mape < mape:
+                mape = new_mape
+                answer_mape = min_elements
+            else:
+                is_finded_answer_mape = True
+        set_elements.remove(min_elements)
     print(answer_mae)
-    # используем его для поиска минимального абсолютного отклонения
-    mape = calculate_mape(selection_elements, set_elements[0])
-    answer_mape = set_elements[0]
-    for elemet in set_elements[1:]:
-        new_mape = calculate_mape(selection_elements, elemet)
-        if new_mape < mape:
-            mape = new_mape
-            answer_mape = elemet
     print(answer_mape)
 
 def calculate_mae(list1: list, shift: float) -> float:
