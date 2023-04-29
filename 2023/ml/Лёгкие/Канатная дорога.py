@@ -1,31 +1,41 @@
 import sys
 
-
 def main():
-	"""
-	Для чтения входных данных необходимо получить их
-	из стандартного потока ввода (sys.stdin).
-	Данные во входном потоке соответствуют описанному
-	в условии формату. Обычно входные данные состоят
-	из нескольких строк.
-	Можно использовать несколько методов:
-	* input() -- читает одну строку из потока без символа
-	перевода строки;
-	* sys.stdin.readline() -- читает одну строку из потока,
-	сохраняя символ перевода строки в конце;
-	* sys.stdin.readlines() -- вернет список (list) строк,
-	сохраняя символ перевода строки в конце каждой из них.
-	Чтобы прочитать из строки стандартного потока:
-	* число -- int(input()) # в строке должно быть одно число
-	* строку -- input()
-	* массив чисел -- map(int, input().split())
-	* последовательность слов -- input().split()
-	Чтобы вывести результат в стандартный поток вывода (sys.stdout),
-	можно использовать функцию print() или sys.stdout.write().
-	Возможное решение задачи "Вычислите сумму чисел в строке":
-	print(sum(map(int, input().split())))
-	"""
-	pass
+    '''
+    '''
+    sample_size = int(input())
+    selection_elements = [[None] * 2 for i in range(sample_size)]
+        
+    for i in range(sample_size):
+        sample = input().split()
+        selection_elements[i][0]=int(sample[0])
+        selection_elements[i][1]=int(sample[1])
+        
+    rope_length = 0
+    walking_length = 0
+    previous_rope_distance = 0
+    previous_rope_high = 0
+    previous_distance = 0
+    previous_high = 0
+    is_need_rope = False
+    
+    for distance, high in selection_elements:
+        if high < previous_rope_high:
+            is_need_rope = True
+        else:
+            if is_need_rope:
+                is_need_rope = False
+                rope_qrt = (high - previous_rope_high)**2 + (distance - previous_rope_distance)**2
+                rope_length += rope_qrt**0.5 
+            previous_rope_high = high
+            previous_rope_distance = distance
+        
+        walking_qrt = (high - previous_high)**2 + (distance - previous_distance)**2
+        walking_length += walking_qrt**0.5     
+        previous_distance = distance
+        previous_high = high
+        
+    print(rope_length + walking_length)
 
 
 if __name__ == '__main__':
