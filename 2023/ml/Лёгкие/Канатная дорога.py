@@ -2,6 +2,10 @@ import sys
 
 def main():
     '''
+    Ищется расстояние канатной дороги
+    - в воздухе (rope_length)
+    - "пешной" канатной дороги (walking_length)
+    Выводится их сумма
     '''
     sample_size = int(input())
     selection_elements = [[None] * 2 for i in range(sample_size)]
@@ -12,11 +16,9 @@ def main():
         selection_elements[i][1]=int(sample[1])
         
     rope_length = 0
-    walking_length = 0
-    previous_rope_distance = 0
-    previous_rope_high = 0
-    previous_distance = 0
-    previous_high = 0
+    walking_length = 0 # сделал отдельной переменной, так как не согласуется с условием
+    previous_rope_distance, previous_distance = 0, 0
+    previous_rope_high, previous_high = 0, 0
     is_need_rope = False
     
     for distance, high in selection_elements:
