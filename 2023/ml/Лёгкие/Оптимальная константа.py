@@ -32,7 +32,7 @@ def main():
     answer_mape = min_elements
     is_finded_answer_mape = False
     
-    while (len(set_elements) > 0) and (not is_finded_answer_mae) and (not is_finded_answer_mape):
+    while (len(set_elements) > 0) and ((not is_finded_answer_mae) or (not is_finded_answer_mape)):
         min_elements = min(set_elements)
         if not is_finded_answer_mae:
             new_mae = calculate_mae(selection_elements, min_elements)
