@@ -27,7 +27,7 @@ def main():
     # дальше создаём сортированный массив уникальных значений
     set_elements = list(set(selection_elements))
     log_2_for_grad = math.log2(max_value*10**6)
-    computational_load_enumeration = 1 + 4*len(set_elements) # примерная оценка
+    computational_load_enumeration = 1 + len(set_elements) # примерная оценка
     computational_load_grad = 6 + 4*log_2_for_grad # примерная оценка
 
     if computational_load_enumeration - computational_load_grad > 0:
@@ -41,10 +41,11 @@ def main():
         min_elements = min_value
         set_elements.remove(min_elements)
 
-        mae = calculate_mae(selection_elements, min_elements)  
+        difference = __difference_list__(selection_elements, [min_elements]*len(selection_elements))
+        mae = calculate_mae_enumeration(difference, min_elements)  
         answer_mae = min_elements
         is_finded_answer_mae = False
-        mape = calculate_mape(selection_elements, min_elements)
+        mape = calculate_mape_enumeration(selection_elements, difference, min_elements)
         answer_mape = min_elements
         is_finded_answer_mape = False
 
@@ -70,16 +71,31 @@ def main():
     
 # ------------------------------------------------------------------------
 
-def calculate_mae(list1: list, shift: float) -> float:
+def calculate_mae(elements: list, shift: float) -> float:
     # FIXME: отутствует какая-либо "защита" от невалидных значений
-    difference = __difference_list__(list1, [shift]*len(list1))
+    difference = __difference_list__(elements, [shift]*len(elements))
     abs_difference = [abs(x) for x in difference]
     mae = sum(abs_difference)
     return mae
 
-def calculate_mape(list1: list, shift: float) -> float:
+def calculate_mae_enumeration(difference: list, shift: float) -> float:
     # FIXME: отутствует какая-либо "защита" от невалидных значений
-    relative_difference = __relative_difference_list__(list1, [shift]*len(list1))
+    abs_difference = [abs(x) for x in difference]
+    mae = sum(abs_difference)
+    return mae
+
+def calculate_mape(elements: list, shift: float) -> float:
+    # FIXME: отутствует какая-либо "защита" от невалидных значений
+    relative_difference = __relative_difference_list__(elements, [shift]*len(elements))
+    abs_difference = [abs(x) for x in relative_difference]
+    mape = sum(abs_difference)
+    return mape
+
+def calculate_mape_enumeration(elements: list, difference: list, shift: float) -> float:
+    # FIXME: отутствует какая-либо "защита" от невалидных значений
+    relative_difference = [None]*len(elements)
+    for i in range(len(elements)):
+        relative_difference[i] = (difference[i])/elements[i]
     abs_difference = [abs(x) for x in relative_difference]
     mape = sum(abs_difference)
     return mape
@@ -130,7 +146,7 @@ def find_opimal_constant_mae_grad(selection_elements: list, max_value, min_value
         return opimal_constant
     previous_derivative = derivative
     
-    while abs(opimal_constant - previous_opimal_constant) > 1e-6:
+    while abs(opimal_constant - previous_opimal_constant) > 1e-7:
         derivative = (calculate_mae(selection_elements, opimal_constant) - 
                       calculate_mae(selection_elements, opimal_constant - 1e-7))/1e-7
         if derivative > 0:
@@ -181,7 +197,7 @@ def find_opimal_constant_mape_grad(selection_elements: list, max_value, min_valu
         return opimal_constant
     previous_derivative = derivative
     
-    while abs(opimal_constant - previous_opimal_constant) > 1e-6:
+    while abs(opimal_constant - previous_opimal_constant) > 1e-7:
         derivative = (calculate_mape(selection_elements, opimal_constant) - 
                       calculate_mape(selection_elements, opimal_constant - 1e-7))/1e-7
         if derivative > 0:
