@@ -40,8 +40,9 @@ def main():
         # используем его для поиска MAE и MAPE
         min_elements = min_value
         set_elements.remove(min_elements)
+        len_selection_elements = len(selection_elements)
 
-        difference = __difference_list__(selection_elements, [min_elements]*len(selection_elements))
+        difference = __difference_list__(selection_elements, [min_elements]*len_selection_elements)
         mae = calculate_mae_enumeration(difference, min_elements)  
         answer_mae = min_elements
         is_finded_answer_mae = False
@@ -51,15 +52,16 @@ def main():
 
         while (len(set_elements) > 0) and ((not is_finded_answer_mae) or (not is_finded_answer_mape)):
             min_elements = min(set_elements)
+            difference = __difference_list__(selection_elements, [min_elements]*len_selection_elements)
             if not is_finded_answer_mae:
-                new_mae = calculate_mae(selection_elements, min_elements)
+                new_mae = calculate_mae_enumeration(difference, min_elements)  
                 if new_mae < mae:
                     mae = new_mae
                     answer_mae = min_elements
                 else:
                     is_finded_answer_mae = True
             if not is_finded_answer_mape:
-                new_mape = calculate_mape(selection_elements, min_elements)
+                new_mape = calculate_mape_enumeration(selection_elements, difference, min_elements)
                 if new_mape < mape:
                     mape = new_mape
                     answer_mape = min_elements
@@ -146,7 +148,7 @@ def find_opimal_constant_mae_grad(selection_elements: list, max_value, min_value
         return opimal_constant
     previous_derivative = derivative
     
-    while abs(opimal_constant - previous_opimal_constant) > 1e-7:
+    while abs(opimal_constant - previous_opimal_constant) > 1e-6/2:
         derivative = (calculate_mae(selection_elements, opimal_constant) - 
                       calculate_mae(selection_elements, opimal_constant - 1e-7))/1e-7
         if derivative > 0:
@@ -197,7 +199,7 @@ def find_opimal_constant_mape_grad(selection_elements: list, max_value, min_valu
         return opimal_constant
     previous_derivative = derivative
     
-    while abs(opimal_constant - previous_opimal_constant) > 1e-7:
+    while abs(opimal_constant - previous_opimal_constant) > 1e-6/2:
         derivative = (calculate_mape(selection_elements, opimal_constant) - 
                       calculate_mape(selection_elements, opimal_constant - 1e-7))/1e-7
         if derivative > 0:
