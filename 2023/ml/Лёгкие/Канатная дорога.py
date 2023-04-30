@@ -6,6 +6,7 @@ def main():
     - в воздухе (rope_length)
     - "пешной" канатной дороги (walking_length)
     Выводится их сумма
+    Задача решённая
     '''
     sample_size = int(input())
     selection_elements = [[None] * 2 for i in range(sample_size)]
