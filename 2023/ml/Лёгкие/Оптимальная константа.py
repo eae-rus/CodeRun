@@ -54,14 +54,14 @@ def main():
             min_elements = min(set_elements)
             difference = __difference_list__(selection_elements, [min_elements]*len_selection_elements)
             if not is_finded_answer_mae:
-                new_mae = calculate_mae_enumeration(difference, min_elements)  
+                new_mae = calculate_mae_enumeration(difference)  
                 if new_mae < mae:
                     mae = new_mae
                     answer_mae = min_elements
                 else:
                     is_finded_answer_mae = True
             if not is_finded_answer_mape:
-                new_mape = calculate_mape_enumeration(selection_elements, difference, min_elements)
+                new_mape = calculate_mape_enumeration(selection_elements, difference)
                 if new_mape < mape:
                     mape = new_mape
                     answer_mape = min_elements
@@ -80,7 +80,7 @@ def calculate_mae(elements: list, shift: float) -> float:
     mae = sum(abs_difference)
     return mae
 
-def calculate_mae_enumeration(difference: list, shift: float) -> float:
+def calculate_mae_enumeration(difference: list) -> float:
     # FIXME: отутствует какая-либо "защита" от невалидных значений
     abs_difference = [abs(x) for x in difference]
     mae = sum(abs_difference)
@@ -93,7 +93,7 @@ def calculate_mape(elements: list, shift: float) -> float:
     mape = sum(abs_difference)
     return mape
 
-def calculate_mape_enumeration(elements: list, difference: list, shift: float) -> float:
+def calculate_mape_enumeration(elements: list, difference: list) -> float:
     # FIXME: отутствует какая-либо "защита" от невалидных значений
     relative_difference = [None]*len(elements)
     for i in range(len(elements)):
