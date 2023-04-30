@@ -1,4 +1,5 @@
 import sys
+import math
 
 
 def main():
@@ -19,12 +20,53 @@ def main():
     
     answer_mse = sum(selection_elements)/sample_size
     print(answer_mse)
-        
-    answer_mae = find_opimal_constant_mae(selection_elements)
-    print(answer_mae)
     
-    answer_mape = find_opimal_constant_mape(selection_elements)
-    print(answer_mape)
+    min_value = min(selection_elements)
+    max_value = max(selection_elements)
+    # выбор оптимального алгоритма
+    # дальше создаём сортированный массив уникальных значений
+    set_elements = list(set(selection_elements))
+    log_2_for_grad = math.log2(max_value*10**6)
+    computational_load_enumeration = 1 + 4*len(set_elements) # примерная оценка
+    computational_load_grad = 6 + 4*log_2_for_grad # примерная оценка
+
+    if computational_load_enumeration - computational_load_grad > 0:
+        answer_mae = find_opimal_constant_mae_grad(selection_elements, max_value, min_value)
+        print(answer_mae)
+
+        answer_mape = find_opimal_constant_mape_grad(selection_elements, max_value, min_value)
+        print(answer_mape)
+    else:
+        # используем его для поиска MAE и MAPE
+        min_elements = min_value
+        set_elements.remove(min_elements)
+
+        mae = calculate_mae(selection_elements, min_elements)  
+        answer_mae = min_elements
+        is_finded_answer_mae = False
+        mape = calculate_mape(selection_elements, min_elements)
+        answer_mape = min_elements
+        is_finded_answer_mape = False
+
+        while (len(set_elements) > 0) and ((not is_finded_answer_mae) or (not is_finded_answer_mape)):
+            min_elements = min(set_elements)
+            if not is_finded_answer_mae:
+                new_mae = calculate_mae(selection_elements, min_elements)
+                if new_mae < mae:
+                    mae = new_mae
+                    answer_mae = min_elements
+                else:
+                    is_finded_answer_mae = True
+            if not is_finded_answer_mape:
+                new_mape = calculate_mape(selection_elements, min_elements)
+                if new_mape < mape:
+                    mape = new_mape
+                    answer_mape = min_elements
+                else:
+                    is_finded_answer_mape = True
+            set_elements.remove(min_elements)
+        print(answer_mae)
+        print(answer_mape)
     
 # ------------------------------------------------------------------------
 
@@ -58,10 +100,8 @@ def __relative_difference_list__(list1: list, list2: list) -> list:
         relative_difference[i] = (list1[i] - list2[i])/list1[i]
     return relative_difference
 
-def find_opimal_constant_mae(selection_elements: list) -> float:
+def find_opimal_constant_mae_grad(selection_elements: list, max_value, min_value) -> float:
     # FIXME: отутствует какая-либо "защита" от невалидных значений
-    min_value = min(selection_elements)
-    max_value = max(selection_elements)
     
     if min_value == max_value:
         return min_value
@@ -111,10 +151,8 @@ def find_opimal_constant_mae(selection_elements: list) -> float:
              
     return opimal_constant
 
-def find_opimal_constant_mape(selection_elements: list) -> float:
+def find_opimal_constant_mape_grad(selection_elements: list, max_value, min_value) -> float:
     # FIXME: отутствует какая-либо "защита" от невалидных значений
-    min_value = min(selection_elements)
-    max_value = max(selection_elements)
     
     if min_value == max_value:
         return min_value
@@ -129,7 +167,7 @@ def find_opimal_constant_mape(selection_elements: list) -> float:
     if derivative < 0:
         return max_value
     
-    opimal_constant = (max_value + min_value)/2
+    opimal_constant = min_value
     step = 1
     derivative = (calculate_mape(selection_elements, opimal_constant) - 
                   calculate_mape(selection_elements, opimal_constant - 1e-7))/1e-7
