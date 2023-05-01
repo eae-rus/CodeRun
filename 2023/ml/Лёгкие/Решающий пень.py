@@ -22,13 +22,6 @@ def f(x, y, a, b, c):
     else:
         return (y - b)**2
 
-def objective(coeffs, x, y):
-    a, b, c = coeffs
-    error = 0
-    for i in range(len(x)):
-        error += (y[i] - f(x[i], a, b, c))**2
-    return error
-
 def gradient(coeffs, x, y):
     a, b, c = coeffs
     grad_a = 0
