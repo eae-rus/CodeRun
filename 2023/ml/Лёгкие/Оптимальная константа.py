@@ -40,19 +40,18 @@ def main():
         # используем его для поиска MAE и MAPE
         min_elements = min_value
         set_elements.remove(min_elements)
-        len_selection_elements = len(selection_elements)
 
-        difference = __difference_list__(selection_elements, [min_elements]*len_selection_elements)
-        mae = calculate_mae_enumeration(difference, min_elements)  
+        difference = __difference_list__(selection_elements, min_elements)
+        mae = calculate_mae_enumeration(difference)  
         answer_mae = min_elements
         is_finded_answer_mae = False
-        mape = calculate_mape_enumeration(selection_elements, difference, min_elements)
+        mape = calculate_mape_enumeration(selection_elements, difference)
         answer_mape = min_elements
         is_finded_answer_mape = False
 
         while (len(set_elements) > 0) and ((not is_finded_answer_mae) or (not is_finded_answer_mape)):
             min_elements = min(set_elements)
-            difference = __difference_list__(selection_elements, [min_elements]*len_selection_elements)
+            difference = __difference_list__(selection_elements, min_elements)
             if not is_finded_answer_mae:
                 new_mae = calculate_mae_enumeration(difference)  
                 if new_mae < mae:
@@ -75,7 +74,7 @@ def main():
 
 def calculate_mae(elements: list, shift: float) -> float:
     # FIXME: отутствует какая-либо "защита" от невалидных значений
-    difference = __difference_list__(elements, [shift]*len(elements))
+    difference = __difference_list__(elements, shift)
     abs_difference = [abs(x) for x in difference]
     mae = sum(abs_difference)
     return mae
@@ -102,20 +101,20 @@ def calculate_mape_enumeration(elements: list, difference: list) -> float:
     mape = sum(abs_difference)
     return mape
 
-def __difference_list__(list1: list, list2: list) -> list: 
+def __difference_list__(list1: list, min_elements: int) -> list: 
     # FIXME: отутствует какая-либо "защита" от невалидных значений
     difference = [None]*len(list1)
     # Используем цикл for для вычисления разности между соответствующими элементами двух списков
     for i in range(len(list1)):
-        difference[i] = list1[i] - list2[i]
+        difference[i] = list1[i] - min_elements
     return difference
 
-def __relative_difference_list__(list1: list, list2: list) -> list: 
+def __relative_difference_list__(list1: list, min_elements: int) -> list: 
     # FIXME: отутствует какая-либо "защита" от невалидных значений
     relative_difference = [None]*len(list1)
     # Используем цикл for для вычисления разности между соответствующими элементами двух списков
     for i in range(len(list1)):
-        relative_difference[i] = (list1[i] - list2[i])/list1[i]
+        relative_difference[i] = (list1[i] - min_elements)/list1[i]
     return relative_difference
 
 def find_opimal_constant_mae_grad(selection_elements: list, max_value, min_value) -> float:
