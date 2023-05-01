@@ -87,7 +87,7 @@ def calculate_mae_enumeration(difference: list) -> float:
 
 def calculate_mape(elements: list, shift: float) -> float:
     # FIXME: отутствует какая-либо "защита" от невалидных значений
-    relative_difference = __relative_difference_list__(elements, [shift]*len(elements))
+    relative_difference = __relative_difference_list__(elements, shift)
     abs_difference = [abs(x) for x in relative_difference]
     mape = sum(abs_difference)
     return mape
