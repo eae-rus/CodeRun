@@ -42,8 +42,15 @@ def gradient(coeffs, x, y):
         grad_c += -2*((f(x[i], y[i], a, b, c) - f(x[i], y[i], a, b, c+delta))/delta)
     return [grad_a/n, grad_b/n, grad_c/n]
 
+def find_start_coeffs(x, y):
+    n = len(x)
+    a = 3*sum(y)/n
+    b = 1/3*sum(y)/n
+    c = sum(x)/n
+    return [a, b, c]
+
 def find_coeffs(x, y, learning_rate=0.1, max_iterations=1000):
-    coeffs = [1, 1, 1.5]
+    coeffs = find_start_coeffs(x, y)
 
     for i in range(max_iterations):
         grad = gradient(coeffs, x, y)
