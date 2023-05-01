@@ -2,6 +2,7 @@ import sys
 import math
 
 
+
 def main():
     '''
     MSE можно найти за счёт математических преобразований (производной) как:
@@ -22,29 +23,30 @@ def main():
     
     min_value = min(selection_elements)
     max_value = max(selection_elements)
-
-    answer_mae = find_opimal_constant_mae_grad(selection_elements, max_value, min_value)
+    len_arr = len(selection_elements)
+    
+    answer_mae = find_opimal_constant_mae(selection_elements, max_value, min_value, len_arr)
     print(answer_mae)
-    answer_mape = find_opimal_constant_mape_grad(selection_elements, max_value, min_value)
+    answer_mape = find_opimal_constant_mape(selection_elements, max_value, min_value, len_arr)
     print(answer_mape)
     
 # ------------------------------------------------------------------------
 
-def calculate_mae(elements: list, shift: float) -> float:
+def calculate_mae(elements: list, shift: float, len_arr: int) -> float:
     # FIXME: отутствует какая-либо "защита" от невалидных значений
     sum = 0
-    for i in range(len(elements)):
+    for i in range(len_arr):
         sum += abs(elements[i] - shift)
     return sum
 
-def calculate_mape(elements: list, shift: float) -> float:
+def calculate_mape(elements: list, shift: float, len_arr: int) -> float:
     # FIXME: отутствует какая-либо "защита" от невалидных значений
     sum = 0
-    for i in range(len(elements)):
+    for i in range(len_arr):
         sum += abs((elements[i] - shift)/elements[i])
     return sum
 
-def find_opimal_constant_mae_grad(selection_elements: list, max_value: int, min_value: int) -> float:
+def find_opimal_constant_mae(selection_elements: list, max_value: int, min_value: int, len_arr: int) -> float:
     # FIXME: отутствует какая-либо "защита" от невалидных значений
     
     if min_value == max_value:
@@ -52,8 +54,8 @@ def find_opimal_constant_mae_grad(selection_elements: list, max_value: int, min_
     
     opimal_constant = (max_value + min_value) / 2
     while abs(max_value - min_value) > 1e-6:
-        derivative = (calculate_mae(selection_elements, opimal_constant) - 
-                      calculate_mae(selection_elements, opimal_constant - 1e-7))
+        derivative = (calculate_mae(selection_elements, opimal_constant, len_arr) - 
+                      calculate_mae(selection_elements, opimal_constant - 1e-7, len_arr))
         if derivative > 0:
             max_value = opimal_constant
         else:
@@ -63,7 +65,7 @@ def find_opimal_constant_mae_grad(selection_elements: list, max_value: int, min_
              
     return opimal_constant
 
-def find_opimal_constant_mape_grad(selection_elements: list, max_value: int, min_value: int) -> float:
+def find_opimal_constant_mape(selection_elements: list, max_value: int, min_value: int, len_arr: int) -> float:
     # FIXME: отутствует какая-либо "защита" от невалидных значений
     
     if min_value == max_value:
@@ -71,8 +73,8 @@ def find_opimal_constant_mape_grad(selection_elements: list, max_value: int, min
     
     opimal_constant = (max_value + min_value) / 2
     while abs(max_value - min_value) > 1e-6:
-        derivative = (calculate_mape(selection_elements, opimal_constant) - 
-                      calculate_mape(selection_elements, opimal_constant - 1e-7))
+        derivative = (calculate_mape(selection_elements, opimal_constant, len_arr) - 
+                      calculate_mape(selection_elements, opimal_constant - 1e-7, len_arr))
         if derivative > 0:
             max_value = opimal_constant
         else:
