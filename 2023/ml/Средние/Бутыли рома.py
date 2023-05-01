@@ -7,8 +7,12 @@ def main():
     
     sum_combinations = 0
     for z in range(1,len(text)+1):
-        set_combinations = set(''.join(comb) for comb in permutations(text, z))
-        sum_combinations += len(set_combinations)
+        gen_combinations = (''.join(comb) for comb in permutations(text, z))
+        set_combinations = set()
+        for comb in gen_combinations:
+            if comb not in set_combinations:
+                set_combinations.add(comb)
+                sum_combinations += 1
         
     print(sum_combinations)
 
