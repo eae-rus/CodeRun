@@ -30,6 +30,26 @@ def main():
     
 # ------------------------------------------------------------------------
 
+def sign(x: float) -> int:
+    if x > 0:
+        return 1
+    elif x < 0:
+        return -1
+    else:
+        return 0
+
+def __find_sign_of_derivative__(elements: list, opimal_constant: float) -> int:
+    sum = 0
+    for element in elements:
+        sum += -sign(element - opimal_constant)
+    return sum
+
+def __find_sign_of_relative_derivative__(elements: list, opimal_constant: float) -> int:
+    sum = 0
+    for element in elements:
+        sum += -(1/element)*sign(element - opimal_constant)
+    return sum
+
 def find_opimal_constant_mae(elements: list, max_value: int, min_value: int) -> float:
     # FIXME: отутствует какая-либо "защита" от невалидных значений
     
@@ -37,9 +57,8 @@ def find_opimal_constant_mae(elements: list, max_value: int, min_value: int) -> 
         return min_value
     
     opimal_constant = (max_value + min_value) / 2
-    while abs(max_value - min_value) > 1e-6:
-        derivative = (sum(abs(element - (opimal_constant + 1e-7)) for element in elements) - 
-                      sum(abs(element - opimal_constant) for element in elements))
+    while abs(max_value - min_value) > 2e-6:
+        derivative = __find_sign_of_derivative__(elements, opimal_constant)
         if derivative > 0:
             max_value = opimal_constant
         else:
@@ -56,9 +75,8 @@ def find_opimal_constant_mape(elements: list, max_value: int, min_value: int) ->
         return min_value
     
     opimal_constant = (max_value + min_value) / 2
-    while abs(max_value - min_value) > 1e-6:
-        derivative = (sum(abs((element - (opimal_constant + 1e-7)) / element) for element in elements) - 
-                      sum(abs((element - opimal_constant) / element) for element in elements))
+    while abs(max_value - min_value) > 2e-6:
+        derivative = __find_sign_of_relative_derivative__(elements, opimal_constant)
         if derivative > 0:
             max_value = opimal_constant
         else:
