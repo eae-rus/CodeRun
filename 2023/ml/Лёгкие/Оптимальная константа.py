@@ -30,25 +30,17 @@ def main():
     
 # ------------------------------------------------------------------------
 
-def sign(x: float) -> int:
-    if x > 0:
-        return 1
-    elif x < 0:
-        return -1
-    else:
-        return 0
+# используются формулы "знаков", так как при расчёте разности, остаётся лишь дельта, которая мала и мы точно знаем, что
+# значения не переходят через "0". При этом, была более красивая реализация, но максимально сократили, поэтому сейчас чуть хуже читается
+# и очень широкая строка. А суть следующая: 
+# вычисляем сумму знаков
 
-def __find_sign_of_derivative__(elements: list, opimal_constant: float) -> int:
-    sum = 0
-    for element in elements:
-        sum += -sign(element - opimal_constant)
-    return sum
+def __sign_derivative__(elements: list, opimal_constant: float) -> int:
+    return -sum(1 for element in elements if element > opimal_constant) + sum(1 for element in elements if element < opimal_constant)
 
-def __find_sign_of_relative_derivative__(elements: list, opimal_constant: float) -> int:
-    sum = 0
-    for element in elements:
-        sum += -(1/element)*sign(element - opimal_constant)
-    return sum
+# Во второй функции ещё учитывается "вес" каждого знака
+def __sign_relative_derivative__(elements: list, opimal_constant: float) -> int:
+    return -sum(1/element for element in elements if element > opimal_constant) + sum(1/element for element in elements if element < opimal_constant)
 
 def find_opimal_constant_mae(elements: list, max_value: int, min_value: int) -> float:
     # FIXME: отутствует какая-либо "защита" от невалидных значений
@@ -58,8 +50,7 @@ def find_opimal_constant_mae(elements: list, max_value: int, min_value: int) -> 
     
     opimal_constant = (max_value + min_value) / 2
     while abs(max_value - min_value) > 2e-6:
-        derivative = __find_sign_of_derivative__(elements, opimal_constant)
-        if derivative > 0:
+        if __sign_derivative__(elements, opimal_constant) > 0:
             max_value = opimal_constant
         else:
             min_value = opimal_constant
@@ -76,8 +67,7 @@ def find_opimal_constant_mape(elements: list, max_value: int, min_value: int) ->
     
     opimal_constant = (max_value + min_value) / 2
     while abs(max_value - min_value) > 2e-6:
-        derivative = __find_sign_of_relative_derivative__(elements, opimal_constant)
-        if derivative > 0:
+        if __sign_relative_derivative__(elements, opimal_constant) > 0:
             max_value = opimal_constant
         else:
             min_value = opimal_constant
