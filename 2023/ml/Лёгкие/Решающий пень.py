@@ -37,9 +37,20 @@ def gradient(coeffs, x, y):
 
 def find_start_coeffs(x, y):
     n = len(x)
-    a = 3*sum(y)/n
-    b = 1/3*sum(y)/n
     c = sum(x)/n
+    sum_mid = sum(y)/n
+    sum_error = 0
+    for i in range(n):
+        if x[i] < c:
+            sum_error += y[i] - sum_mid
+
+    if sum_error > 0:
+        a = 3*sum(y)/n
+        b = 1/3*sum(y)/n
+    else:
+        a = 1/3*sum(y)/n
+        b = 3*sum(y)/n
+
     return [a, b, c]
 
 def find_coeffs(x, y, learning_rate=0.1, max_iterations=1000):
