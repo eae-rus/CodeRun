@@ -12,40 +12,25 @@ def main():
     отношения количества выборок к максимальному значению, пока что это не учитывается.
     '''
     sample_size = int(input())
-    selection_elements = [None] * sample_size
+    elements = [None] * sample_size
         
     for i in range(sample_size):
-        selection_elements[i] = int(input())
+        elements[i] = int(input())
     
-    answer_mse = sum(selection_elements)/sample_size
+    answer_mse = sum(elements)/sample_size
     print(answer_mse)
     
-    min_value = min(selection_elements)
-    max_value = max(selection_elements)
+    min_value = min(elements)
+    max_value = max(elements)
     
-    answer_mae = find_opimal_constant_mae(selection_elements, max_value, min_value)
+    answer_mae = find_opimal_constant_mae(elements, max_value, min_value)
     print(answer_mae)
-    answer_mape = find_opimal_constant_mape(selection_elements, max_value, min_value)
+    answer_mape = find_opimal_constant_mape(elements, max_value, min_value)
     print(answer_mape)
     
 # ------------------------------------------------------------------------
 
-def calculate_mae(elements: list, shift: float) -> float:
-    # FIXME: отутствует какая-либо "защита" от невалидных значений
-    return sum(abs(element - shift) for element in elements)
-
-def calculate_mape(elements: list, shift: float, len_arr: int) -> float:
-    # FIXME: отутствует какая-либо "защита" от невалидных значений
-    sum = 0
-    for i in range(len_arr):
-        sum += abs((elements[i] - shift)/elements[i])
-    return sum
-
-def calculate_mape(elements: list, shift: float) -> float:
-    # FIXME: отутствует какая-либо "защита" от невалидных значений
-    return sum(abs((element - shift) / element) for element in elements)
-
-def find_opimal_constant_mae(selection_elements: list, max_value: int, min_value: int) -> float:
+def find_opimal_constant_mae(elements: list, max_value: int, min_value: int) -> float:
     # FIXME: отутствует какая-либо "защита" от невалидных значений
     
     if min_value == max_value:
@@ -53,8 +38,8 @@ def find_opimal_constant_mae(selection_elements: list, max_value: int, min_value
     
     opimal_constant = (max_value + min_value) / 2
     while abs(max_value - min_value) > 1e-6:
-        derivative = (calculate_mae(selection_elements, opimal_constant) - 
-                      calculate_mae(selection_elements, opimal_constant - 1e-7))
+        derivative = (sum(abs(element - (opimal_constant + 1e-7)) for element in elements) - 
+                      sum(abs(element - opimal_constant) for element in elements))
         if derivative > 0:
             max_value = opimal_constant
         else:
@@ -64,7 +49,7 @@ def find_opimal_constant_mae(selection_elements: list, max_value: int, min_value
              
     return opimal_constant
 
-def find_opimal_constant_mape(selection_elements: list, max_value: int, min_value: int) -> float:
+def find_opimal_constant_mape(elements: list, max_value: int, min_value: int) -> float:
     # FIXME: отутствует какая-либо "защита" от невалидных значений
     
     if min_value == max_value:
@@ -72,8 +57,8 @@ def find_opimal_constant_mape(selection_elements: list, max_value: int, min_valu
     
     opimal_constant = (max_value + min_value) / 2
     while abs(max_value - min_value) > 1e-6:
-        derivative = (calculate_mape(selection_elements, opimal_constant) - 
-                      calculate_mape(selection_elements, opimal_constant - 1e-7))
+        derivative = (sum(abs((element - (opimal_constant + 1e-7)) / element) for element in elements) - 
+                      sum(abs((element - opimal_constant) / element) for element in elements))
         if derivative > 0:
             max_value = opimal_constant
         else:
