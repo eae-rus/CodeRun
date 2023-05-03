@@ -24,21 +24,27 @@ def f(x, y, a, b, c):
 
 def gradient(coeffs, x, y, learning_rate):
     a, b, c, delta_c = coeffs
-    delta_c = learning_rate
     grad_a = 0
     grad_b = 0
     grad_c = 0
     delta = (1e-3)/2
     n = len(x)
-    for i in range(n):
-        grad_a += -2*((f(x[i], y[i], a, b, c) - f(x[i], y[i], a+delta, b, c))/delta)
-        grad_b += -2*((f(x[i], y[i], a, b, c) - f(x[i], y[i], a, b+delta, c))/delta)
-        grad_c += -2*((f(x[i], y[i], a, b, c) - f(x[i], y[i], a, b, c+delta_c))/delta_c)
-    return [grad_a/n, grad_b/n, grad_c/n]
+    if delta_c == 0:
+        for i in range(n):
+            grad_a += -2*((f(x[i], y[i], a, b, c) - f(x[i], y[i], a+delta, b, c))/delta)
+            grad_b += -2*((f(x[i], y[i], a, b, c) - f(x[i], y[i], a, b+delta, c))/delta)
+        return [grad_a/n, grad_b/n, 0]
+    else:
+        for i in range(n):
+            delta_c = delta_c * 5 * learning_rate
+            grad_a += -2*((f(x[i], y[i], a, b, c) - f(x[i], y[i], a+delta, b, c))/delta)
+            grad_b += -2*((f(x[i], y[i], a, b, c) - f(x[i], y[i], a, b+delta, c))/delta)
+            grad_c += -2*((f(x[i], y[i], a, b, c) - f(x[i], y[i], a, b, c+delta_c))/delta_c)
+        return [grad_a/n, grad_b/n, grad_c/n]
 
 def find_start_coeffs(x, y):
     n = len(x)
-    c = sum(x)/n
+    c = 1.01*sum(x)/n
     delta_c = max(x) - min(x)
     sum_mid = sum(y)/n
     sum_error = 0
