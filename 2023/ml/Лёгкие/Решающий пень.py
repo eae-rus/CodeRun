@@ -17,30 +17,31 @@ def main():
     print(" ".join(map(str, coeffs)))
 
 def f(x, y, a, b, c):
-    if x < c:
-        return (y - a)**2
-    else:
-        return (y - b)**2
+    len_x = len(x)
+    sum = 0
+    for i in range(len_x):
+        if x[i] < c:
+            sum += (y[i] - a)**2
+        else:
+            sum += (y[i] - b)**2
+    return (sum/len_x)**0.5 
 
-def gradient(coeffs, x, y, learning_rate):
-    a, b, c, delta_c = coeffs
+def gradient(x, y, f_value, a, b, c, delta_c, learning_rate):
     grad_a = 0
     grad_b = 0
     grad_c = 0
-    delta = (1e-3)/2
+    delta = (1e-7)/2
     n = len(x)
     if delta_c == 0:
-        for i in range(n):
-            grad_a += -2*((f(x[i], y[i], a, b, c) - f(x[i], y[i], a+delta, b, c))/delta)
-            grad_b += -2*((f(x[i], y[i], a, b, c) - f(x[i], y[i], a, b+delta, c))/delta)
+        grad_a += -2*((f_value - f(x, y, a+delta, b, c))/delta)
+        grad_b += -2*((f_value - f(x, y, a, b+delta, c))/delta)
         return [grad_a/n, grad_b/n, 0]
     else:
-        for i in range(n):
-            delta_c = delta_c * 5 * learning_rate
-            grad_a += -2*((f(x[i], y[i], a, b, c) - f(x[i], y[i], a+delta, b, c))/delta)
-            grad_b += -2*((f(x[i], y[i], a, b, c) - f(x[i], y[i], a, b+delta, c))/delta)
-            grad_c += -2*((f(x[i], y[i], a, b, c) - f(x[i], y[i], a, b, c+delta_c))/delta_c)
-        return [grad_a/n, grad_b/n, grad_c/n]
+        delta_c = delta_c * 5 * learning_rate
+        grad_a += -2*((f_value - f(x, y, a+delta, b, c))/delta)
+        grad_b += -2*((f_value - f(x, y, a, b+delta, c))/delta)
+        grad_c += -2*((f_value - f(x, y, a, b, c+delta_c))/delta_c)
+        return [grad_a, grad_b, grad_c]
 
 def find_start_coeffs(x, y):
     n = len(x)
@@ -61,18 +62,21 @@ def find_start_coeffs(x, y):
 
     return [a, b, c, delta_c]
 
-def find_coeffs(x, y, learning_rate=0.1, max_iterations=1000):
+def find_coeffs(x, y, learning_rate=0.1, max_iterations=2000):
     coeffs = find_start_coeffs(x, y)
+    a, b, c, delta_c = coeffs
 
+    f_value = f(x, y, a, b, c)
     for i in range(max_iterations):
-        grad = gradient(coeffs, x, y, learning_rate)
-        coeffs[0] -= learning_rate * grad[0]
-        coeffs[1] -= learning_rate * grad[1]
-        coeffs[2] -= learning_rate * grad[2]
+        grad = gradient(x, y, f_value, a, b, c, delta_c, learning_rate)
+        a -= learning_rate * grad[0]
+        b -= learning_rate * grad[1]
+        c -= learning_rate * grad[2]
+        f_value = f_value = f(x, y, a, b, c)
         if i % 100 == 0:
             learning_rate /= 2
     
-    return coeffs[:3]
+    return [a, b, c]
 
 
 if __name__ == '__main__':
