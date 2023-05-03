@@ -1,6 +1,7 @@
 import math
 # from itertools import permutations
 from collections import Counter
+from functools import reduce
 
 
 def main():
@@ -43,32 +44,36 @@ def main():
         
         # Все точки между ними (не нашёл комбинаторной формулы)
         dict_text = dict(Counter(text))
+        cache = {}
         for i in range(2, len_text - 1):
-            sum_combinations_v2 += combination(dict_text, i)
+            sum_combinations_v2 += combination(dict_text, i, cache)
 
         # предпоследняя и последняя точки с учётом лишних
         sum_combinations_v2 += 2 * calculat_combination_later(dict_text, len_text)
         print(int(sum_combinations_v2))
 
 
-def combination(dict_text: dict, i : int) -> int:
+def combination(dict_text: dict, i: int, cache: dict) -> int:
     if i > 0:
-        sum = 0
-        for value in dict_text.keys():
-            dict_copy = dict_text.copy()
-            dict_copy[value] -= 1
-            if dict_copy[value] == 0:
-                del dict_copy[value]
-            sum += combination(dict_copy, i - 1)
-        return sum
+        key = (tuple(sorted(dict_text.items())), i)
+        if key in cache:
+            return cache[key]
+        else:
+            sum = 0
+            for value in dict_text.keys():
+                dict_copy = dict_text.copy()
+                dict_copy[value] -= 1
+                if dict_copy[value] == 0:
+                    del dict_copy[value]
+                sum += combination(dict_copy, i - 1, cache)
+            cache[key] = sum
+            return sum
     else:
         return 1
 
 def calculat_combination_later(dict_text: dict, len_text: int) -> int:
-    result = math.factorial(len_text)
-    for value in dict_text.values(): # вторая и третья точки
-        result /= math.factorial(value)
-    return result
+    return reduce(lambda x, y: x // y, (math.factorial(value) for value in dict_text.values()), math.factorial(len_text))
+
     
 
 if __name__ == '__main__':
