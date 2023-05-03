@@ -1,6 +1,3 @@
-import sys
-import math
-
 
 def main():
     
@@ -26,59 +23,37 @@ def f(x, y, a, b, c):
             sum += (y[i] - b)**2
     return (sum/len_x)**0.5 
 
-def gradient(x, y, f_value, a, b, c, delta_c_start, learning_rate):
-    grad_a = 0
-    grad_b = 0
-    grad_c = 0
-    delta = (1e-7)/2
-    n = len(x)
-    if delta_c_start == 0:
-        grad_a += -2*((f_value - f(x, y, a+delta, b, c))/delta)
-        grad_b += -2*((f_value - f(x, y, a, b+delta, c))/delta)
-        return [grad_a/n, grad_b/n, 0]
-    else:
-        delta_c = delta_c_start * 5 * learning_rate
-        grad_a += -((f_value - f(x, y, a+delta, b, c))/delta)
-        grad_b += -((f_value - f(x, y, a, b+delta, c))/delta)
-        grad_c += -((f_value - f(x, y, a, b, c+delta))/delta)
-        return [grad_a, grad_b, grad_c]
-
-def find_start_coeffs(x, y):
-    n = len(x)
-    c = 1.01*sum(x)/n
-    delta_c = max(x) - min(x)
-    sum_mid = sum(y)/n
-    max_y = max(y)
-    min_y = min(y)
-    sum_error = 0
-    for i in range(n):
-        if x[i] < c:
-            sum_error += y[i] - sum_mid
-
-    if sum_error > 0:
-        a = max_y - (max_y + min_y)/10
-        b = min_y + (max_y - min_y)/10
-    else:
-        a = min_y + (max_y - min_y)/10
-        b = max_y - (max_y + min_y)/10
-
-    return [a, b, c, delta_c]
-
-def find_coeffs(x, y, learning_rate=1, max_iterations=2000):
-    coeffs = find_start_coeffs(x, y)
-    a, b, c, delta_c = coeffs
-
-    f_value = f(x, y, a, b, c)
-    for i in range(max_iterations):
-        grad = gradient(x, y, f_value, a, b, c, delta_c, learning_rate)
-        a -= learning_rate * grad[0]
-        b -= learning_rate * grad[1]
-        c -= learning_rate * grad[2]
-        f_value = f_value = f(x, y, a, b, c)
-        if i % 100 == 0:
-            learning_rate /= 2
+def find_coeffs(x, y):
+    set_y = set(x)
+    len_x = len(x)
+    a_opt = y[0]
+    b_opt = y[0]
+    c_opt = x[0]
+    f_min = f(x, y, a_opt, b_opt, c_opt)
     
-    return [a, b, c]
+    for c_i in set_y:
+        y_sum_low = 0
+        y_len_low = 0
+        y_sum_uper = 0
+        y_len_uper = 0
+        for i in range(len_x):
+            if x[i] < c_i:
+                y_sum_low += y[i]
+                y_len_low += 1
+            else:
+                y_sum_uper += y[i]
+                y_len_uper += 1
+        a_i = y_sum_low / y_len_low if y_len_low != 0 else 0
+        b_i = y_sum_uper / y_len_uper if y_len_uper != 0 else 0
+        f_i = f(x, y, a_i, b_i, c_i)
+        
+        if f_i < f_min:
+            a_opt = a_i
+            b_opt = b_i
+            c_opt = c_i
+            f_min = f_i
+    
+    return [a_opt, b_opt, c_opt]
 
 
 if __name__ == '__main__':
