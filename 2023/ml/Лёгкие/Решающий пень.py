@@ -1,4 +1,3 @@
-
 import numpy as np
 
 def main():
@@ -14,8 +13,7 @@ def main():
 def f(x, y, a, b, c):
     y_low = y[x < c]
     y_uper = y[x >= c]
-    sum = np.sum((y_low - a)**2) + np.sum((y_uper - b)**2)
-    return sum
+    return np.square(y_low - a).sum() + np.square(y_uper - b).sum()
 
 def find_coeffs(x, y):
     set_x = np.unique(x)
