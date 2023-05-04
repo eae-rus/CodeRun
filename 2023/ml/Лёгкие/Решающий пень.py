@@ -10,22 +10,24 @@ def main():
     coeffs = find_coeffs(x, y)
     print(" ".join(map(str, coeffs)))
 
-def f(x, y, a, b, c):
-    y_low = y[x < c]
-    y_uper = y[x >= c]
+def f(x, y_low, y_uper, a, b):
     return np.square(y_low - a).sum() + np.square(y_uper - b).sum()
 
 def find_coeffs(x, y):
     set_x = np.unique(x)
-    a_opt, b_opt, c_opt = y[0], y[0], x[0]
-    f_min = f(x, y, a_opt, b_opt, c_opt)
+    c_opt = x[0]
+    y_low = y[x < c_opt]
+    y_uper = y[x >= c_opt]
+    a_opt = np.mean(y_low) if len(y_low) != 0 else 0
+    b_opt = np.mean(y_uper) if len(y_uper) != 0 else 0
+    f_min = f(x, y_low, y_uper, a_opt, b_opt)
 
     for c_i in set_x:
         y_low = y[x < c_i]
         y_uper = y[x >= c_i]
         a_i = np.mean(y_low) if len(y_low) != 0 else 0
         b_i = np.mean(y_uper) if len(y_uper) != 0 else 0
-        f_i = f(x, y, a_i, b_i, c_i)
+        f_i = f(x, y_low, y_uper, a_i, b_i)
 
         if f_i < f_min:
             a_opt, b_opt, c_opt, f_min = a_i, b_i, c_i, f_i
