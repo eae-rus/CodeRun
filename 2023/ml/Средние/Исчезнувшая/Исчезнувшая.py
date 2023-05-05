@@ -26,13 +26,14 @@ def main() -> None:
             photo_2[n,m] = ord(line[m])
 
     answer: bool = find_foto__in_all_planes(photo_1, photo_2)  
+    answer: bool = find_foto_in_all_planes(photo_1, photo_2)  
 
     if answer:
         print("Yes")
     else:
         print("No")
 
-def find_foto__in_all_planes(photo_1: np.ndarray, photo_2: np.ndarray) -> bool:
+def find_foto_in_all_planes(photo_1: np.ndarray, photo_2: np.ndarray) -> bool:
     '''
     Function that checks if one photo can be found in all planes of the 
     other by rotating the second photo 90 degrees four times and checking 
