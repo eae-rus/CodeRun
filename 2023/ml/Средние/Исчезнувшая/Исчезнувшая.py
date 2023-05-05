@@ -4,8 +4,8 @@ import numpy as np
 def main() -> None:
     '''
     '''
-    file_path = os.path.abspath("input.txt")
-    #file_path = os.path.abspath("") + '\\2023\\ml\\Средние\\Исчезнувшая\\Пример 2.txt'
+    #file_path = os.path.abspath("input.txt")
+    file_path = os.path.abspath("") + '\\2023\\ml\\Средние\\Исчезнувшая\\Пример 2.txt'
     
     with open(file_path, 'r') as f:
         n1, m1 = map(int, f.readline()[:-1].split())
@@ -36,7 +36,7 @@ def find_foto_in_all_planes(photo_1: np.ndarray, photo_2: np.ndarray) -> bool:
         if find_foto(photo_1, photo_2):
             return True
         else:
-            photo_2 = np.rot90(photo_2)
+            photo_2 = np.transpose(photo_2[::-1,:])
     return False
 
 def find_foto(photo_1: np.ndarray, photo_2: np.ndarray) -> bool:
