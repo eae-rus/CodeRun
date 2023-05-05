@@ -1,31 +1,27 @@
+import os
 import numpy as np
 
 def main() -> None:
     '''
-    Main function that takes in user input to create two photos and
-    checks if one photo can be found in all planes of the other.
-
-    Args:
-        None
-
-    Returns:
-        None
     '''
-    n1, m1 = map(int, input()[:-1].split())
-    photo_1: np.ndarray = np.empty((n1, m1), dtype=np.uint8)
-    for n in range(n1):
-        line: str = input()
-        for m in range(m1):
-            photo_1[n,m] = ord(line[m])
+    file_path = os.path.abspath("input.txt")
+    #file_path = os.path.abspath("") + '\\2023\\ml\\Средние\\Исчезнувшая\\Пример 2.txt'
+    
+    with open(file_path, 'r') as f:
+        n1, m1 = map(int, f.readline()[:-1].split())
+        photo_1 = np.empty((n1, m1))
+        for n in range(n1):
+            line = f.readline()
+            for m in range(m1):
+                photo_1[n,m] = ord(line[m])
+                
+        n2, m2 = map(int, f.readline()[:-1].split())
+        photo_2 = np.empty((n2, m2))
+        for n in range(n2):
+            line = f.readline()
+            for m in range(m2):
+                photo_2[n,m] = ord(line[m])
 
-    n2, m2 = map(int, input()[:-1].split())
-    photo_2: np.ndarray = np.empty((n2, m2), dtype=np.uint8)
-    for n in range(n2):
-        line: str = input()
-        for m in range(m2):
-            photo_2[n,m] = ord(line[m])
-
-    answer: bool = find_foto__in_all_planes(photo_1, photo_2)  
     answer: bool = find_foto_in_all_planes(photo_1, photo_2)  
 
     if answer:
@@ -35,16 +31,6 @@ def main() -> None:
 
 def find_foto_in_all_planes(photo_1: np.ndarray, photo_2: np.ndarray) -> bool:
     '''
-    Function that checks if one photo can be found in all planes of the 
-    other by rotating the second photo 90 degrees four times and checking 
-    if the photo is found in each rotation.
-
-    Args:
-        photo_1 (numpy.ndarray): The first photo.
-        photo_2 (numpy.ndarray): The second photo.
-
-    Returns:
-        bool: True if the photo is found in all planes, False otherwise.
     '''
     for _ in range(4):
         if find_foto(photo_1, photo_2):
@@ -55,16 +41,6 @@ def find_foto_in_all_planes(photo_1: np.ndarray, photo_2: np.ndarray) -> bool:
 
 def find_foto(photo_1: np.ndarray, photo_2: np.ndarray) -> bool:
     '''
-    Function that checks if one photo can be found in the other by comparing
-    all possible subarrays of the second photo of the same size as the first 
-    photo to the first photo.
-
-    Args:
-        photo_1 (numpy.ndarray): The first photo.
-        photo_2 (numpy.ndarray): The second photo.
-
-    Returns:
-        bool: True if the photo is found in the other, False otherwise.
     '''
     n1, m1 = photo_1.shape
     n2, m2 = photo_2.shape
