@@ -78,12 +78,10 @@ def find_foto(photo_1: np.ndarray, photo_2: np.ndarray) -> bool:
             return False
 
     else:
-        for i in range(n2 - n1):
-            for k in range(m2 - m1):
+        for i in range(n2 - n1+1):
+            for k in range(m2 - m1+1):
                 if np.array_equal(photo_1, photo_2[i:i+n1, k:k+m1]):
                     return True
-                else:
-                    return False
         return False
 
 
