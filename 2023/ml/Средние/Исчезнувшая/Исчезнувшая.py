@@ -1,5 +1,6 @@
 import os
 import numpy as np
+from functools import lru_cache
 
 def main() -> None:
     '''
@@ -61,6 +62,9 @@ def find_foto(photo_1: np.ndarray, photo_2: np.ndarray) -> bool:
                     return True
         return False
 
+@lru_cache(maxsize=None)
+def array_equal(a: np.ndarray, b: np.ndarray) -> bool:
+    return np.array_equal(a, b)
 
 if __name__ == '__main__':
     main()
