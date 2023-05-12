@@ -1,76 +1,74 @@
-import numpy as np
-
 def main():
-    
+
     class MeanCalculator:
         def __init__(self):
-            self.Count = 0.
-            self.Mean = 0.
-    
-        def Add(self, value, weight = 1.):
-            self.Count += weight
-            self.Mean += weight * (value - self.Mean) / self.Count
-    
-        def Remove(self, value, weight = 1.):
-            self.Add(value, -weight)
-    
+            self.count = 0.
+            self.mean = 0.
+
+        def add(self, value, weight=1.):
+            cur_diff = value - self.mean
+            self.count += weight
+            self.mean += weight * cur_diff / self.count
+
+        def remove(self, value, weight=1.):
+            self.add(value, -weight)
+
     class SumSquaredErrorsCalculator:
         def __init__(self):
-            self.MeanCalculator = MeanCalculator()
-            self.SSE = 0.
-    
-        def Add(self, value, weight = 1.):
-            curDiff = value - self.MeanCalculator.Mean
-            self.MeanCalculator.Add(value, weight)
-            self.SSE += weight * curDiff * (value - self.MeanCalculator.Mean)
-    
-        def Remove(self, value, weight = 1.):
-            self.Add(value, -weight)
-    
-    OverAllSSE = SumSquaredErrorsCalculator()
-    
+            self.mean_calculator = MeanCalculator()
+            self.sse = 0.
+
+        def add(self, value, weight=1.):
+            cur_diff = value - self.mean_calculator.mean
+            self.mean_calculator.add(value, weight)
+            self.sse += weight * cur_diff * (value - self.mean_calculator.mean)
+
+        def remove(self, value, weight=1.):
+            self.add(value, -weight)
+
+    overall_sse = SumSquaredErrorsCalculator()
+
     sample_size = int(input())
-    all_items = np.zeros((sample_size, 2))
+    all_items = []
     for i in range(sample_size):
         x, y = map(int, input().split())
-        all_items[i] = [x, y]
-        OverAllSSE.Add(y)
-    all_items = all_items[np.argsort(all_items[:, 0])]
+        all_items.append([x, y])
+        overall_sse.add(y)
+    all_items.sort(key=lambda x: x[0])
 
     left = SumSquaredErrorsCalculator()
-    right = OverAllSSE
+    right = overall_sse
 
-    bestA = 0
-    bestB = right.MeanCalculator.Mean
-    bestC = all_items[0][0]
+    best_a = 0
+    best_b = right.mean_calculator.mean
+    best_c = all_items[0][0]
 
-    bestQ = right.SSE
-    
+    best_q = right.sse
+
     for i in range(sample_size - 1):
         item = all_items[i]
-        nextItem = all_items[i + 1]
+        next_item = all_items[i + 1]
 
-        left.Add(item[1])
-        right.Remove(item[1])
+        left.add(item[1])
+        right.remove(item[1])
 
-        if item[0] == nextItem[0]:
+        if item[0] == next_item[0]:
             continue
 
-        a = left.MeanCalculator.Mean
-        b = right.MeanCalculator.Mean
-        c = (item[0] + nextItem[0]) / 2
+        a = left.mean_calculator.mean
+        b = right.mean_calculator.mean
+        c = (item[0] + next_item[0]) / 2
 
-        q = left.SSE + right.SSE
+        q = left.sse + right.sse
 
-        if q < bestQ:
-            bestA = a
-            bestB = b
-            bestC = c
-            bestQ = q
-    
-    coeffs = [bestA, bestB, bestC]
+        if q < best_q:
+            best_a = a
+            best_b = b
+            best_c = c
+            best_q = q
+
+    coeffs = [best_a, best_b, best_c]
     print(" ".join(map(str, coeffs)))
-
-       
+    
 if __name__ == '__main__':
 	main()
