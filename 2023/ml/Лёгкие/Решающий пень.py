@@ -1,36 +1,76 @@
 import numpy as np
 
+class MeanCalculator:
+    def __init__(self):
+        self.Count = 0.
+        self.Mean = 0.
+
+    def Add(self, value, weight = 1.):
+        self.Count += weight
+        self.Mean += weight * (value - self.Mean) / self.Count
+
+    def Remove(self, value, weight = 1.):
+        self.Add(value, -weight)
+
+class SumSquaredErrorsCalculator:
+    def __init__(self):
+        self.MeanCalculator = MeanCalculator()
+        self.SSE = 0.
+
+    def Add(self, value, weight = 1.):
+        curDiff = value - self.MeanCalculator.Mean
+        self.MeanCalculator.Add(value, weight)
+        self.SSE += weight * curDiff * (value - self.MeanCalculator.Mean)
+
+    def Remove(self, value, weight = 1.):
+        self.Add(value, -weight)
+
+
 def main():
+    OverAllSSE = SumSquaredErrorsCalculator()
     
     sample_size = int(input())
-    x, y = np.empty(sample_size), np.empty(sample_size)
+    all_items = np.zeros((sample_size, 2))
     for i in range(sample_size):
-        x[i], y[i] = map(int, input().split())
+        x, y = map(int, input().split())
+        all_items[i] = [x, y]
+        OverAllSSE.Add(y)
+    all_items = all_items[np.argsort(all_items[:, 0])]
 
-    coeffs = find_coeffs(x, y, sample_size)
+    left = SumSquaredErrorsCalculator()
+    right = OverAllSSE
+
+    bestA = 0
+    bestB = right.MeanCalculator.Mean
+    bestC = all_items[0][0]
+
+    bestQ = right.SSE
+    
+    for i in range(sample_size - 1):
+        item = all_items[i]
+        nextItem = all_items[i + 1]
+
+        left.Add(item[1])
+        right.Remove(item[1])
+
+        if item[0] == nextItem[0]:
+            continue
+
+        a = left.MeanCalculator.Mean
+        b = right.MeanCalculator.Mean
+        c = (item[0] + nextItem[0]) / 2
+
+        q = left.SSE + right.SSE
+
+        if q < bestQ:
+            bestA = a
+            bestB = b
+            bestC = c
+            bestQ = q
+    
+    coeffs = [bestA, bestB, bestC]
     print(" ".join(map(str, coeffs)))
 
-
-def f(x, y, c, sample_size):
-    y_low = y[x < c]
-    y_uper = y[x >= c]
-    len_y_low = len(y_low)
-    len_y_upper = sample_size - len_y_low
-    a = np.mean(y_low) if len_y_low != 0 else 0
-    b = np.mean(y_uper) if len_y_upper != 0 else 0
-    f_value = np.square(y_low - a).sum() + np.square(y_uper - b).sum()
-    return [a, b, f_value]
-
-def find_coeffs(x, y, sample_size):
-    set_x = np.unique(x)
-    c_opt = set_x[0]
-    a_opt, b_opt, f_min = f(x, y, c_opt, sample_size)
-
-    for c_i in set_x:
-        a_i, b_i, f_i = f(x, y, c_i, sample_size)
-        if f_i < f_min:
-            a_opt, b_opt, c_opt, f_min = a_i, b_i, c_i, f_i
-    return [a_opt, b_opt, c_opt]
-
+       
 if __name__ == '__main__':
 	main()
