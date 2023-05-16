@@ -35,7 +35,7 @@ def main():
     filled_ratings = np.where(np.isnan(U_M_train), mean_ratings, U_M_train)
 
     # вычисляем среднее значение оценок
-    mean_rating = np.nanmean(filled_ratings)
+    mean_rating = np.nanmean(U_M_train)
 
     # выполняем SVD разложение
     min_dim = 10
@@ -44,8 +44,8 @@ def main():
     U, sigma, V = svds(filled_ratings - mean_rating, k=min_dim)
 
     # получаем смещения по пользователю и фильму
-    user_bias = filled_ratings.mean(axis=1) - mean_rating
-    movie_bias = filled_ratings.mean(axis=0) - mean_rating
+    user_bias = U_M_train.mean(axis=1) - mean_rating
+    movie_bias = U_M_train.mean(axis=0) - mean_rating
 
     for _ in range(T_value):
         user, movie = map(int, input().split())
