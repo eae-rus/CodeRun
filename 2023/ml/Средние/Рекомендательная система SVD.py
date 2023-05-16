@@ -1,25 +1,29 @@
 import numpy as np
 import pandas as pd
-from sklearn.decomposition import TruncatedSVD
+from scipy.sparse.linalg import svds
 
 def main():
     def predict_rating(user_id, movie_id):
         # получаем вектор пользователя
-        user_vector = svd.transform(filled_ratings[user_id].reshape(1, -1) - mean_rating)
+        user_vector = U[user_id, :].reshape(1, -1)
 
         # получаем вектор фильма
-        movie_vector = svd.components_.T[movie_id]
+        movie_vector = V[:, movie_id].reshape(-1, 1)
 
         # вычисляем предсказанную оценку
-        predicted_rating = mean_rating + user_bias[user_id] + movie_bias[movie_id] + user_vector.dot(movie_vector)
-        
-        if predicted_rating[0] > k_value:
+        predicted_rating = user_vector.dot(movie_vector)[0, 0]
+        predicted_rating += mean_rating
+        predicted_rating += user_bias[user_id] + movie_bias[movie_id]
+        # predicted_rating = mean_rating + user_bias[user_id] + movie_bias[movie_id] + user_vector.dot(movie_vector)[0, 0]
+        # predicted_rating = mean_rating + user_vector.dot(movie_vector)[0, 0]
+
+        if predicted_rating > k_value:
             return k_value
-        elif predicted_rating[0] < 0:
+        elif predicted_rating < 0:
             return 0
         else:
-            return predicted_rating[0]
-    
+            return predicted_rating
+
     k_value, U_value, M_value, D_value, T_value = map(int, input().split())
     U_M_train = pd.DataFrame(np.nan, index=range(U_value), columns=range(M_value))
     for _ in range(D_value):
@@ -33,14 +37,11 @@ def main():
     # вычисляем среднее значение оценок
     mean_rating = np.nanmean(filled_ratings)
 
-    # создаем объект SVD
+    # выполняем SVD разложение
     min_dim = 10
     if U_value <= 10 or M_value <= 10:
         min_dim = min(U_value, M_value)-1
-    svd = TruncatedSVD(n_components=min_dim, random_state=42)
-
-    # выполняем SVD разложение
-    svd.fit(filled_ratings - mean_rating)
+    U, sigma, V = svds(filled_ratings - mean_rating, k=min_dim)
 
     # получаем смещения по пользователю и фильму
     user_bias = filled_ratings.mean(axis=1) - mean_rating
