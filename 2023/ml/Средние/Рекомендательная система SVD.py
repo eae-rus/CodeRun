@@ -34,7 +34,10 @@ def main():
     mean_rating = np.nanmean(filled_ratings)
 
     # создаем объект SVD
-    svd = TruncatedSVD(n_components=3, random_state=42)
+    min_dim = 10
+    if U_value <= 10 or M_value <= 10:
+        min_dim = min(U_value, M_value)-1
+    svd = TruncatedSVD(n_components=min_dim, random_state=42)
 
     # выполняем SVD разложение
     svd.fit(filled_ratings - mean_rating)
@@ -47,8 +50,6 @@ def main():
         user, movie = map(int, input().split())
         rating = predict_rating(user, movie)
         print(rating)
-
-
 
 
 if __name__ == '__main__':
