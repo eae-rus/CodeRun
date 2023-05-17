@@ -4,7 +4,8 @@ from scipy.sparse.linalg import svds
 def main():
     def predict_rating(user_id, movie_id):
         # получаем вектор пользователя
-        user_vector = P[user_id, :]
+        
+        user_vector = np.multiply(U[user_id, :], sigma.T)
 
         # получаем вектор фильма
         movie_vector = V[:, movie_id]
@@ -47,7 +48,7 @@ def main():
     if U_value <= 10 or M_value <= 10:
         min_dim = min(U_value, M_value) - 1
     U, sigma, V = svds(U_M_train - mean_rating, k=min_dim)
-    P = U.dot(np.diag(sigma))
+    # P = U.dot(np.diag(sigma))
 
     # вычисление предсказаний и вывод результатов
     for _ in range(T_value):
