@@ -25,6 +25,7 @@ def main():
     # чтение входных данных
     k_value, U_value, M_value, D_value, T_value = map(int, input().split())
     U_M_train = np.full((U_value, M_value), np.nan)
+    U_M_train = np.full((U_value, M_value), np.nan, dtype=np.float32)
     for _ in range(D_value):
         user, movie, rating = map(int, input().split())
         U_M_train[user, movie] = rating
