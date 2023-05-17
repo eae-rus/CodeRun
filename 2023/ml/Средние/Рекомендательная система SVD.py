@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 from scipy.sparse.linalg import svds
 
 def main():
@@ -22,15 +21,16 @@ def main():
         else:
             return predicted_rating
 
+    # чтение входных данных
     k_value, U_value, M_value, D_value, T_value = map(int, input().split())
     U_M_train = np.full((U_value, M_value), np.nan)
     for _ in range(D_value):
         user, movie, rating = map(int, input().split())
-        U_M_train[user][movie] = rating
+        U_M_train[user, movie] = rating
 
     # вычисляем среднее значение оценок
     mean_rating = np.nanmean(U_M_train)
-    
+
     # получаем смещения по пользователю и фильму
     user_bias = np.nanmean(U_M_train, axis=1) - mean_rating
     movie_bias = np.nanmean(U_M_train, axis=0) - mean_rating
@@ -45,10 +45,11 @@ def main():
     # выполняем SVD разложение
     min_dim = 10
     if U_value <= 10 or M_value <= 10:
-        min_dim = min(U_value, M_value)-1
+        min_dim = min(U_value, M_value) - 1
     U, sigma, V = svds(U_M_train - mean_rating, k=min_dim)
     P = U.dot(np.diag(sigma))
-    
+
+    # вычисление предсказаний и вывод результатов
     for _ in range(T_value):
         user, movie = map(int, input().split())
         rating = predict_rating(user, movie)
