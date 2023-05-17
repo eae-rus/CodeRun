@@ -24,18 +24,31 @@ def main():
 
     # чтение входных данных
     k_value, U_value, M_value, D_value, T_value = map(int, input().split())
-    U_M_train = np.full((U_value, M_value), np.nan)
     U_M_train = np.full((U_value, M_value), np.nan, dtype=np.float32)
+    all_ratings = 0
+    all_ratings_count = 0
+    user_bias = np.zeros(U_value)
+    user_bias_count = np.zeros(U_value, dtype=np.int32)
+    movie_bias = np.zeros(M_value)
+    moveie_bias_count = np.zeros(M_value, dtype=np.int32)
     for _ in range(D_value):
         user, movie, rating = map(int, input().split())
+        # занесение данных в матрицу
         U_M_train[user, movie] = rating
+        # вычисления средних
+        all_ratings += rating
+        all_ratings_count += 1
+        user_bias[user] += rating
+        user_bias_count[user] += 1
+        movie_bias[movie] += rating
+        moveie_bias_count[movie] += 1
 
     # вычисляем среднее значение оценок
-    mean_rating = np.nanmean(U_M_train)
+    mean_rating = all_ratings / all_ratings_count
 
     # получаем смещения по пользователю и фильму
-    user_bias = np.nanmean(U_M_train, axis=1) - mean_rating
-    movie_bias = np.nanmean(U_M_train, axis=0) - mean_rating
+    user_bias = user_bias / user_bias_count - mean_rating
+    movie_bias = movie_bias / moveie_bias_count - mean_rating
 
     # обработка пропущенных значений
     mean_ratings = np.nanmean(U_M_train, axis=1)
@@ -49,7 +62,6 @@ def main():
     if U_value <= 10 or M_value <= 10:
         min_dim = min(U_value, M_value) - 1
     U, sigma, V = svds(U_M_train - mean_rating, k=min_dim)
-    # P = U.dot(np.diag(sigma))
 
     # вычисление предсказаний и вывод результатов
     for _ in range(T_value):
