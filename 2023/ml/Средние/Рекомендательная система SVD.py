@@ -5,17 +5,15 @@ from scipy.sparse.linalg import svds
 def main():
     def predict_rating(user_id, movie_id):
         # получаем вектор пользователя
-        user_vector = U[user_id, :].reshape(1, -1)
+        user_vector = P[user_id, :]
 
         # получаем вектор фильма
-        movie_vector = V[:, movie_id].reshape(-1, 1)
+        movie_vector = V[:, movie_id]
 
         # вычисляем предсказанную оценку
-        predicted_rating = user_vector.dot(movie_vector)[0, 0]
+        predicted_rating = user_vector.dot(movie_vector)
         predicted_rating += mean_rating
         predicted_rating += user_bias[user_id] + movie_bias[movie_id]
-        # predicted_rating = mean_rating + user_bias[user_id] + movie_bias[movie_id] + user_vector.dot(movie_vector)[0, 0]
-        # predicted_rating = mean_rating + user_vector.dot(movie_vector)[0, 0]
 
         if predicted_rating > k_value:
             return k_value
@@ -42,7 +40,8 @@ def main():
     if U_value <= 10 or M_value <= 10:
         min_dim = min(U_value, M_value)-1
     U, sigma, V = svds(filled_ratings - mean_rating, k=min_dim)
-
+    P = U.dot(np.diag(sigma))
+    
     # получаем смещения по пользователю и фильму
     user_bias = U_M_train.mean(axis=1) - mean_rating
     movie_bias = U_M_train.mean(axis=0) - mean_rating
