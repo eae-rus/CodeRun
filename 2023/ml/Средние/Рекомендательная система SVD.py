@@ -29,8 +29,15 @@ def main():
         U_M_train.iloc[user, movie] = rating
 
     # обработка пропущенных значений
-    mean_ratings = np.nanmean(U_M_train, axis=0)
-    filled_ratings = np.where(np.isnan(U_M_train), mean_ratings, U_M_train)
+    mean_ratings = np.nanmean(U_M_train, axis=1)
+    filled_ratings = np.zeros((U_value, M_value))
+    for i in range(U_value):
+        for k in range(M_value):
+            if np.isnan(U_M_train.iloc[i, k]):
+                filled_ratings[i][k] = mean_ratings[i]
+            else:
+                filled_ratings[i][k] = U_M_train.iloc[i, k]
+    # filled_ratings = np.where(np.isnan(U_M_train), mean_ratings, U_M_train)
 
     # вычисляем среднее значение оценок
     mean_rating = np.nanmean(U_M_train)
