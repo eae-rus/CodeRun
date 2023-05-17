@@ -23,36 +23,32 @@ def main():
             return predicted_rating
 
     k_value, U_value, M_value, D_value, T_value = map(int, input().split())
-    U_M_train = pd.DataFrame(np.nan, index=range(U_value), columns=range(M_value))
+    U_M_train = np.full((U_value, M_value), np.nan)
     for _ in range(D_value):
         user, movie, rating = map(int, input().split())
-        U_M_train.iloc[user, movie] = rating
-
-    # обработка пропущенных значений
-    mean_ratings = np.nanmean(U_M_train, axis=1)
-    filled_ratings = np.zeros((U_value, M_value))
-    for i in range(U_value):
-        for k in range(M_value):
-            if np.isnan(U_M_train.iloc[i, k]):
-                filled_ratings[i][k] = mean_ratings[i]
-            else:
-                filled_ratings[i][k] = U_M_train.iloc[i, k]
-    # filled_ratings = np.where(np.isnan(U_M_train), mean_ratings, U_M_train)
+        U_M_train[user][movie] = rating
 
     # вычисляем среднее значение оценок
     mean_rating = np.nanmean(U_M_train)
+    
+    # получаем смещения по пользователю и фильму
+    user_bias = np.nanmean(U_M_train, axis=1) - mean_rating
+    movie_bias = np.nanmean(U_M_train, axis=0) - mean_rating
+
+    # обработка пропущенных значений
+    mean_ratings = np.nanmean(U_M_train, axis=1)
+    for i in range(U_value):
+        for k in range(M_value):
+            if np.isnan(U_M_train[i][k]):
+                U_M_train[i][k] = mean_ratings[i]
 
     # выполняем SVD разложение
     min_dim = 10
     if U_value <= 10 or M_value <= 10:
         min_dim = min(U_value, M_value)-1
-    U, sigma, V = svds(filled_ratings - mean_rating, k=min_dim)
+    U, sigma, V = svds(U_M_train - mean_rating, k=min_dim)
     P = U.dot(np.diag(sigma))
     
-    # получаем смещения по пользователю и фильму
-    user_bias = U_M_train.mean(axis=1) - mean_rating
-    movie_bias = U_M_train.mean(axis=0) - mean_rating
-
     for _ in range(T_value):
         user, movie = map(int, input().split())
         rating = predict_rating(user, movie)
