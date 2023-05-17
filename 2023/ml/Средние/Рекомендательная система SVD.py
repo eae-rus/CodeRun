@@ -53,9 +53,14 @@ def main():
     # обработка пропущенных значений
     mean_ratings = np.nanmean(U_M_train, axis=1)
     for i in range(U_value):
-        for k in range(M_value):
-            if np.isnan(U_M_train[i][k]):
-                U_M_train[i][k] = mean_ratings[i]
+        if user_bias_count[i] >= 1:
+            for k in range(M_value):
+                if np.isnan(U_M_train[i][k]):
+                    U_M_train[i][k] = mean_ratings[i]
+        else:
+            for k in range(M_value):
+                if np.isnan(U_M_train[i][k]):
+                    U_M_train[i][k] = mean_rating
 
     # выполняем SVD разложение
     min_dim = 10
