@@ -15,12 +15,12 @@ def main():
         predicted_rating += mean_rating
         predicted_rating += user_bias[user_id] + movie_bias[movie_id]
 
-        if predicted_rating > k_value:
+        if predicted_rating > 1:
             return k_value
         elif predicted_rating < 0:
             return 0
         else:
-            return predicted_rating
+            return predicted_rating * k_value
 
     # чтение входных данных
     k_value, U_value, M_value, D_value, T_value = map(int, input().split())
@@ -33,6 +33,7 @@ def main():
     moveie_bias_count = np.zeros(M_value, dtype=np.int32)
     for _ in range(D_value):
         user, movie, rating = map(int, input().split())
+        rating /= k_value
         # занесение данных в матрицу
         U_M_train[user, movie] = rating
         # вычисления средних
