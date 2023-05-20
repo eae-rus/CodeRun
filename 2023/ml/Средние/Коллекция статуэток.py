@@ -1,29 +1,27 @@
-import numpy as np
-
 def main():
     """
     """
     n, k = map(int, input().split())
     a = list(map(int, input().split()))
     
-    signal_avail = np.full(k, False, dtype=np.bool_)
-    counts_cont = np.zeros(k, dtype=np.int32)
+    counts = {}
     l, r = 0, 0
     cost = float('inf')
     while l < n:
-        while (not signal_avail.all()) and r < n:
+        while len(counts) < k and r < n:
             if a[r] <= k:
-                counts_cont[a[r]-1] += 1
-                if (not signal_avail[a[r]-1]):
-                    signal_avail[a[r]-1] = True
+                if a[r] not in counts:
+                    counts[a[r]] = 1
+                else:
+                    counts[a[r]] += 1
             r += 1
-        if signal_avail.all():
+        if len(counts) == k:
             cost = min(cost, sum(a[l:r]))
         
         if a[l] <= k:
-            counts_cont[a[l]-1] -= 1
-            if counts_cont[a[l]-1] == 0:
-                signal_avail[a[l]-1] = False
+            counts[a[l]] -= 1
+            if counts[a[l]] == 0:
+                del counts[a[l]]
         l += 1
     
     print(cost)
