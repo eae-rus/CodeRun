@@ -13,22 +13,37 @@ def main():
         good_sets = []
         stupid_sets = []
 
-        for i in range(n):
-            numeric_matrix = np.zeros((8, 8), dtype=np.uint16)
+        for i in range(0, n, 2):
+            numeric_matrix_1 = np.zeros((8, 8), dtype=np.uint16)
             for j in range(1000):
                 perm = list(map(int, f.readline()[:-1].split()))
                 for k in range(8):
-                    numeric_matrix[k][perm[k]-1] += 1
+                    numeric_matrix_1[k][perm[k]-1] += 1
+            standard_deviation_1 = np.std(numeric_matrix_1)
 
-            standard_deviation = np.std(numeric_matrix)
-            # for j in range(8):
-            #     for k in range(8):
-            #         if numeric_matrix[j][k] > 125 + 10:
-            #             stupid += 1
-            if standard_deviation < 11.7:
-                good_sets.append(i)
+            numeric_matrix_2 = np.zeros((8, 8), dtype=np.uint16)
+            for j in range(1000):
+                perm = list(map(int, f.readline()[:-1].split()))
+                for k in range(8):
+                    numeric_matrix_2[k][perm[k]-1] += 1
+            standard_deviation_2 = np.std(numeric_matrix_2)
+            
+            if abs(standard_deviation_1 - standard_deviation_2) > 1:
+                if standard_deviation_1 < standard_deviation_2:
+                    good_sets.append(i)
+                    stupid_sets.append(i+1)
+                else:
+                    stupid_sets.append(i)
+                    good_sets.append(i+1)
             else:
-                stupid_sets.append(i)
+                spread_1 = numeric_matrix_1.max() - numeric_matrix_1.min()
+                spread_2 = numeric_matrix_2.max() - numeric_matrix_2.min()
+                if spread_1 < spread_2:
+                    good_sets.append(i)
+                    stupid_sets.append(i+1)
+                else:
+                    stupid_sets.append(i)
+                    good_sets.append(i+1)
 
         file_path_out = os.path.abspath("") + '\\2023\\ml\\Средние\\Перестановки\\output.txt'
         with open(file_path_out, "w") as f:
