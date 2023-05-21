@@ -1,4 +1,5 @@
 import sys
+import hashlib
 
 def main():
     """_summary_
@@ -7,15 +8,14 @@ def main():
     m = 131072 # 2**17
     bits = [False] * m
     unique_count = 0
-    degree_divisor = 140737488355328 # 2**47
-    degree_add = 65536 # 2**16
 
     for _ in range(n):
-        h = hash(sys.stdin.readline())
-        h = int(h / degree_divisor) + degree_add
-        if not bits[h]:
+        s = sys.stdin.readline()
+        h = hashlib.sha512(s.encode()).hexdigest()
+        hv = int(h, 16) % m
+        if not bits[hv]:
             unique_count += 1
-            bits[h] = True
+            bits[hv] = True
 
     print(unique_count)
 
