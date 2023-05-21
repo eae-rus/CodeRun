@@ -19,31 +19,55 @@ def main():
                 perm = list(map(int, f.readline()[:-1].split()))
                 for k in range(8):
                     numeric_matrix_1[k][perm[k]-1] += 1
-            standard_deviation_1 = np.std(numeric_matrix_1)
 
             numeric_matrix_2 = np.zeros((8, 8), dtype=np.uint16)
             for j in range(1000):
                 perm = list(map(int, f.readline()[:-1].split()))
                 for k in range(8):
                     numeric_matrix_2[k][perm[k]-1] += 1
-            standard_deviation_2 = np.std(numeric_matrix_2)
             
-            if abs(standard_deviation_1 - standard_deviation_2) > 1:
-                if standard_deviation_1 < standard_deviation_2:
-                    good_sets.append(i)
-                    stupid_sets.append(i+1)
+            good = 0
+            stupid = 0
+            for k in range(8):
+                standard_deviation_1 = np.std(numeric_matrix_1[k])
+                standard_deviation_2 = np.std(numeric_matrix_2[k])
+                if abs(standard_deviation_1 - standard_deviation_2) > 1:
+                    if standard_deviation_1 < standard_deviation_2:
+                        good += 1
+                    else:
+                        stupid += 1
                 else:
-                    stupid_sets.append(i)
-                    good_sets.append(i+1)
+                    spread_1 = numeric_matrix_1.max() - numeric_matrix_1.min()
+                    spread_2 = numeric_matrix_2.max() - numeric_matrix_2.min()
+                    if spread_1 < spread_2:
+                        good += 1
+                    else:
+                        stupid += 1
+            
+            if good > stupid:
+                good_sets.append(i)
+                stupid_sets.append(i+1)
+            elif good < stupid:
+                stupid_sets.append(i)
+                good_sets.append(i+1)
             else:
-                spread_1 = numeric_matrix_1.max() - numeric_matrix_1.min()
-                spread_2 = numeric_matrix_2.max() - numeric_matrix_2.min()
-                if spread_1 < spread_2:
-                    good_sets.append(i)
-                    stupid_sets.append(i+1)
+                if abs(standard_deviation_1 - standard_deviation_2) > 1:
+                    if standard_deviation_1 < standard_deviation_2:
+                        good_sets.append(i)
+                        stupid_sets.append(i+1)
+                    else:
+                        stupid_sets.append(i)
+                        good_sets.append(i+1)
                 else:
-                    stupid_sets.append(i)
-                    good_sets.append(i+1)
+                    spread_1 = numeric_matrix_1.max() - numeric_matrix_1.min()
+                    spread_2 = numeric_matrix_2.max() - numeric_matrix_2.min()
+                    if spread_1 < spread_2:
+                        good_sets.append(i)
+                        stupid_sets.append(i+1)
+                    else:
+                        stupid_sets.append(i)
+                        good_sets.append(i+1)
+
 
         file_path_out = os.path.abspath("") + '\\2023\\ml\\Средние\\Перестановки\\output.txt'
         with open(file_path_out, "w") as f:
