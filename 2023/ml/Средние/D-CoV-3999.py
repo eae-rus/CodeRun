@@ -15,21 +15,20 @@ def main():
         k, *meetings = map(int, input().split())
         for j in meetings:
             if dict_visited.get(j) is None:
-                dict_visited[j] = [i, -1]
+                dict_visited[j] = [i]
             else:
-                dict_visited[j][1] = i
+                dict_visited[j].append(i)
     
-    visited = np.array([(k, *v) for k, v in dict_visited.items()])
+    visited = np.array([k for k in dict_visited.keys()])
     # Получение индексов, отсортированных по первому столбцу
-    sorted_indices = np.argsort(visited[:, 0])
+    visited = np.sort(visited, axis=0)
     
-    for i in sorted_indices:
-        employee_1 = visited[i][1]
-        employee_2 = visited[i][2]
-        if employee_1 != -1 and employee_2 != -1:
-            if status[employee_1] or status[employee_2]:
-                status[employee_1] = 1
-                status[employee_2] = 1   
+    for number_visite in visited:
+        for employee in dict_visited[number_visite]:
+            if status[employee] == 1:
+                for employee_sick in dict_visited[number_visite]:
+                    status[employee_sick] = 1
+                continue
 
     # Вывод статусов сотрудников
     print(' '.join(map(str, status)))
