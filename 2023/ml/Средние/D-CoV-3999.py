@@ -1,4 +1,3 @@
-import sys
 import numpy as np
 
 def main():
@@ -7,7 +6,7 @@ def main():
                 
     # Чтение входных данных
     n = int(input())
-    status = np.full(n, False, dtype=np.uint8)
+    status = np.full(n, 0, dtype=np.uint8)
     dict_visited = {}
     # Чтение заражённых сотрудников
     status = np.array(list(map(int, input().split()))).astype(np.uint8)
@@ -15,7 +14,7 @@ def main():
     for i in range(0,n):
         k, *meetings = map(int, input().split())
         for j in meetings:
-            if dict_visited.get(k) is None:
+            if dict_visited.get(j) is None:
                 dict_visited[j] = [i, -1]
             else:
                 dict_visited[j][1] = i
