@@ -16,40 +16,21 @@ def main():
         good_sets = []
         stupid_sets = []
         for i in range(0, n):
-            numeric_matrix_1 = np.zeros((8, 8), dtype=np.uint32)
+            numeric_matrix = np.zeros((8, 8), dtype=np.uint32)
             for j in range(1000):
                 perm = list(map(int, f.readline()[:-1].split()))
                 for k in range(8):
-                    numeric_matrix_1[k][perm[k]-1] += 1
-
-            #numeric_matrix_2 = np.zeros((8, 8), dtype=np.uint32)
-            #for j in range(1000):
-            #    perm = list(map(int, f.readline()[:-1].split()))
-            #    for k in range(8):
-            #        numeric_matrix_2[k][perm[k]-1] += 1
+                    numeric_matrix[k][perm[k]-1] += 1
             
-            sum_anomaly_1 = (numeric_matrix_1[0][7] + numeric_matrix_1[1][0] + numeric_matrix_1[2][1] +
-                             numeric_matrix_1[3][2] + numeric_matrix_1[4][3] + numeric_matrix_1[5][4] +
-                             numeric_matrix_1[6][5] + numeric_matrix_1[7][6])
-            #sum_anomaly_2 = (numeric_matrix_2[0][7] + numeric_matrix_2[1][0] + numeric_matrix_2[2][1] +
-            #                 numeric_matrix_2[3][2] + numeric_matrix_2[4][3] + numeric_matrix_2[5][4] +
-            #                 numeric_matrix_2[6][5] + numeric_matrix_2[7][6])
-            #x = numeric_matrix_2[0]
-            #if (sum_anomaly_1 > sum_anomaly_2):
-            #    good_sets.append(i)
-            #    stupid_sets.append(i+1)
-            #else:
-            #    stupid_sets.append(i)
-            #    good_sets.append(i+1)
+            sum_anomaly_1 = (numeric_matrix[0][7] + numeric_matrix[1][0] + numeric_matrix[2][1] +
+                             numeric_matrix[3][2] + numeric_matrix[4][3] + numeric_matrix[5][4] +
+                             numeric_matrix[6][5] + numeric_matrix[7][6])
+
             if sum_anomaly_1 <= 1115: # выявлено экспериментально, граница где-то у 1115-1131
                 good_sets.append(i)
             else:
                 stupid_sets.append(i)
 
-        #x1 = max(good_sets)
-        #x2 = min(good_sets)
-        #y1 = max(stupid_sets)
-        #y2 = min(stupid_sets)
         file_path_out = os.path.abspath("") + '\\2023\\ml\\Средние\\Перестановки\\output.txt'
         with open(file_path_out, "w") as f:
             for result in good_sets:
