@@ -36,7 +36,7 @@ def main():
 
         recomendation.append(r_a[key_a_min].pop())
         previous_key = key_a_min
-        if len(r_a[key_a_min]) == 0:
+        if r_a[key_a_min] == []:
             m_set.discard(key_a_min)
 
     print(*recomendation) # вывод в обратном порядке
