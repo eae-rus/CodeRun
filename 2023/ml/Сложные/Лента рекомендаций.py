@@ -1,5 +1,4 @@
 import sys
-from collections import deque
 
 def main():
     '''
@@ -11,7 +10,7 @@ def main():
     for i in range(n):
         array_a.append(int(sys.stdin.readline().strip()))
         
-    m_deque = deque(set(array_a))
+    m_set = set(array_a)
     r_a = [[] for i in range(m)]
 
     # Разделение данных в словарь в сортированном порядке
@@ -26,7 +25,7 @@ def main():
     for j in range(n):
         a_min = n
         key_a_min = -1
-        for key in m_deque:
+        for key in m_set:
             if previous_key != key:
                 if r_a[key][-1] < a_min:
                     a_min = r_a[key][-1]
@@ -38,7 +37,7 @@ def main():
         recomendation.append(r_a[key_a_min].pop())
         previous_key = key_a_min
         if len(r_a[key_a_min]) == 0:
-            m_deque.remove(key_a_min)
+            m_set.discard(key_a_min)
 
     print(*recomendation) # вывод в обратном порядке
 
