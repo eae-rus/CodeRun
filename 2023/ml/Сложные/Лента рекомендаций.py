@@ -22,12 +22,12 @@ def main():
     # формирование выходного массива
     recomendation = []
     previous_key = -1
-    for j in range(n):
+    for _ in range(n):
         a_min = n
         key_a_min = -1
         for key in m_set:
-            if previous_key != key:
-                if r_a[key][-1] < a_min:
+            if r_a[key][-1] < a_min:
+                if previous_key != key:
                     a_min = r_a[key][-1]
                     key_a_min = key
 
