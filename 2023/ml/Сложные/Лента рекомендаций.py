@@ -1,5 +1,6 @@
 import sys
 from collections import defaultdict
+from collections import deque
 
 def main():
     '''
@@ -12,6 +13,8 @@ def main():
     array_a = []
     for i in range(n):
         array_a.append(int(sys.stdin.readline().strip()))
+        
+    m_deque = deque(set(array_a))
 
     # Разделение данных в словарь в сортированном порядке
     for i, ai in enumerate(reversed(array_a)):
@@ -23,7 +26,7 @@ def main():
     for j in range(n):
         a_max = -1
         key_a_max = -1
-        for key in dict_r_a.keys():
+        for key in m_deque:
             if previous_key != key:
                 if dict_r_a[key][-1] > a_max:
                     a_max = dict_r_a[key][-1]
@@ -35,7 +38,7 @@ def main():
         recomendation.append(n-1 - dict_r_a[key_a_max].pop()) # n-1 так как у нас введена обратная нумерация "ценности"
         previous_key = key_a_max
         if not dict_r_a[key_a_max]:
-            del dict_r_a[key_a_max]
+            m_deque.remove(key_a_max)
 
     print(*recomendation) # вывод в обратном порядке
 
