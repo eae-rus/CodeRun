@@ -14,9 +14,9 @@ def main():
     r_a = [[] for i in range(m)]
 
     # Разделение данных в словарь в сортированном порядке
-    for i in range(n):
-        ai = array_a[-1-i]
-        r_a[ai].append(n-1-i)
+    for i in range(1,n+1):
+        ai = array_a[-i]
+        r_a[ai].append(n-i)
 
 
     # формирование выходного массива
