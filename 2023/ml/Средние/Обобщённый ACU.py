@@ -9,26 +9,39 @@ def main():
         y_true_sample, y_pred_sample  = map(float, input().split())
         y_true.append(y_true_sample)
         y_pred.append(y_pred_sample)
-    
+
+    # Сортировка массивов y_true и y_pred по возрастанию y_true
+    sorted_indices = sorted(range(sample_size), key=lambda k: y_true[k])
+    y_true = [y_true[i] for i in sorted_indices]
+    y_pred = [y_pred[i] for i in sorted_indices]
+
+    # Итерация по отсортированным массивам с двумя указателями
+    left, right = 0, 1
     sum_numerator = 0
     sum_divisor = 0
-    for i in range(sample_size):
-        for j in range(i+1, sample_size):
-            if y_true[i] < y_true[j]: # прямой случай
-                sum_divisor += 1
-                if y_pred[i] < y_pred[j]:
-                    sum_numerator += 1
-                elif y_pred[i] == y_pred[j]:
-                    sum_numerator += 0.5
-            elif y_true[i] > y_true[j]:
-                sum_divisor += 1
-                if y_pred[j] < y_pred[i]:
-                    sum_numerator += 1
-                elif y_pred[j] == y_pred[i]:
-                    sum_numerator += 0.5
-    
-    auc = sum_numerator / sum_divisor
+    while right < sample_size:
+        if y_true[right] != y_true[left]:
+            # Вычисление числителя и знаменателя для пары left-right
+            divisor = (right - left) * (sample_size - right)
+            numerator = 0
+            for i in range(left, right):
+                for j in range(right, sample_size):
+                    if y_pred[i] < y_pred[j]:
+                        numerator += 1
+                    elif y_pred[i] == y_pred[j]:
+                        numerator += 0.5
+            sum_divisor += divisor
+            sum_numerator += numerator
+            left = right
+        right += 1
+
+    # Вычисление AUC
+    if sum_divisor == 0:
+        auc = 0.0
+    else:
+        auc = sum_numerator / sum_divisor
+
     print(auc)
 
 if __name__ == '__main__':
-	main()
+    main()
