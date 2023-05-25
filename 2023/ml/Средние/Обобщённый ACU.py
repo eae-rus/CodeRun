@@ -11,24 +11,29 @@ def main():
         y_pred.append(y_pred_sample)
 
     # Сортировка массивов y_true и y_pred по возрастанию y_true
-    sorted_indices = sorted(range(sample_size), key=lambda k: y_true[k])
-    y_true = [y_true[i] for i in sorted_indices]
-    y_pred = [y_pred[i] for i in sorted_indices]
+    y_true_set = sorted(set(y_true))
+    new_y_true = []
+    new_y_pred = []
+    for y_true_sample in y_true_set:
+        for i in range(sample_size):
+            if y_true[i] == y_true_sample:
+                new_y_true.append(y_true[i])
+                new_y_pred.append(y_pred[i])
 
     # Итерация по отсортированным массивам с двумя указателями
     left, right = 0, 1
     sum_numerator = 0
     sum_divisor = 0
     while right < sample_size:
-        if y_true[right] != y_true[left]:
+        if new_y_true[right] != new_y_true[left]:
             # Вычисление числителя и знаменателя для пары left-right
             divisor = (right - left) * (sample_size - right)
             numerator = 0
             for i in range(left, right):
                 for j in range(right, sample_size):
-                    if y_pred[i] < y_pred[j]:
+                    if new_y_pred[i] < new_y_pred[j]:
                         numerator += 1
-                    elif y_pred[i] == y_pred[j]:
+                    elif new_y_pred[i] == new_y_pred[j]:
                         numerator += 0.5
             sum_divisor += divisor
             sum_numerator += numerator
