@@ -13,22 +13,19 @@ def main():
     sum_numerator = 0
     sum_divisor = 0
     for i in range(sample_size):
-        for j in range(sample_size):
-            # расчёт I_pred
-            if y_pred[i] > y_pred[j]:
-                I_pred = 0
-            elif y_pred[i] == y_pred[j]:
-                I_pred = 0.5
-            else:
-                I_pred = 1
-            # расчёт I_true
-            if y_true[i] >= y_true[j]:
-                I_true = 0
-            else:
-                I_true = 1
-                
-            sum_numerator += I_pred * I_true
-            sum_divisor += I_true
+        for j in range(i+1, sample_size):
+            if y_true[i] < y_true[j]: # прямой случай
+                sum_divisor += 1
+                if y_pred[i] < y_pred[j]:
+                    sum_numerator += 1
+                elif y_pred[i] == y_pred[j]:
+                    sum_numerator += 0.5
+            elif y_true[i] > y_true[j]:
+                sum_divisor += 1
+                if y_pred[j] < y_pred[i]:
+                    sum_numerator += 1
+                elif y_pred[j] == y_pred[i]:
+                    sum_numerator += 0.5
     
     auc = sum_numerator / sum_divisor
     print(auc)
