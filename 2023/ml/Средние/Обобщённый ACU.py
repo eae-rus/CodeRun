@@ -26,13 +26,14 @@ def main():
     # вычисление ROC AUC
     sum_numerator = 0
     sum_divisor = 0
+    left_for_divisor = 0
     
     for y_true_left in range(len_y_true_set-1):
-        for y_true_right in range(y_true_left + 1, len_y_true_set):
-            len_array_left = len(dict_pred[y_true_left])
+        len_array_left = len(dict_pred[y_true_left])
+        left_for_divisor += len_array_left
+        sum_divisor += len_array_left * (sample_size - left_for_divisor)
+        for y_true_right in range(y_true_left + 1, len_y_true_set):      
             len_array_right = len(dict_pred[y_true_right])
-
-            sum_divisor += len_array_left * len_array_right
             right_previous = 0
             for left in range(len_array_left):
                 is_first_occurrence = True
