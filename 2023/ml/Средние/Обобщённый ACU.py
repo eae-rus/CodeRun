@@ -19,9 +19,11 @@ def main():
         y_true_index = y_true_set.index(y_true[i])
         dict_pred[y_true_index].append(y_pred[i])
     
+    len_dict_pred = []
     # сортировка внутри словаря
     for y_true_sample in range(len_y_true_set):
         dict_pred[y_true_sample].sort()
+        len_dict_pred.append(len(dict_pred[y_true_sample]))
 
     # вычисление ROC AUC
     sum_numerator = 0
@@ -29,17 +31,15 @@ def main():
     left_for_divisor = 0
     
     for y_true_left in range(len_y_true_set-1):
-        len_array_left = len(dict_pred[y_true_left])
-        left_for_divisor += len_array_left
-        sum_divisor += len_array_left * (sample_size - left_for_divisor)
+        left_for_divisor += len_dict_pred[y_true_left]
+        sum_divisor += len_dict_pred[y_true_left] * (sample_size - left_for_divisor)
         for y_true_right in range(y_true_left + 1, len_y_true_set):      
-            len_array_right = len(dict_pred[y_true_right])
             right_previous = 0
-            for left in range(len_array_left):
+            for left in range(len_dict_pred[y_true_left]):
                 is_first_occurrence = True
-                for right in range(right_previous, len_array_right):
+                for right in range(right_previous, len_dict_pred[y_true_right]):
                     if dict_pred[y_true_left][left] < dict_pred[y_true_right][right]:
-                        sum_numerator += len_array_right - right
+                        sum_numerator += len_dict_pred[y_true_right] - right
                         if is_first_occurrence:
                             right_previous = right
                             is_first_occurrence = False
