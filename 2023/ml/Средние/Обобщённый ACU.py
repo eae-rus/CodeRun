@@ -37,10 +37,12 @@ def main():
             len_array_right = array_right.__len__()
 
             sum_divisor += len_array_left * len_array_right
+            right_previous = 0
             for left in range(len_array_left):
-                for right in range(len_array_right):
+                for right in range(right_previous, len_array_right):
                     if array_left[left] < array_right[right]:
                         sum_numerator += len_array_right - right
+                        right_previous = right
                         break
                     elif array_left[left] == array_right[right]:
                         sum_numerator += 0.5
