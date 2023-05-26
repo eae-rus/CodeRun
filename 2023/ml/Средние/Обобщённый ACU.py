@@ -39,13 +39,19 @@ def main():
             sum_divisor += len_array_left * len_array_right
             right_previous = 0
             for left in range(len_array_left):
+                is_first_occurrence = True
                 for right in range(right_previous, len_array_right):
                     if array_left[left] < array_right[right]:
                         sum_numerator += len_array_right - right
-                        right_previous = right
+                        if is_first_occurrence:
+                            right_previous = right
+                            is_first_occurrence = False
                         break
                     elif array_left[left] == array_right[right]:
                         sum_numerator += 0.5
+                        if is_first_occurrence:
+                            right_previous = right
+                            is_first_occurrence = False
 
     # Вычисление AUC
     if sum_divisor == 0:
