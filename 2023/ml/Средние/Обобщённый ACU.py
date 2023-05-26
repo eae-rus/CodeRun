@@ -13,41 +13,37 @@ def main():
     # Сортировка массивов y_true и y_pred по возрастанию y_true
     y_true_set = list(set(y_true))
     y_true_set.sort()
-    dict_pred = {}
+    len_y_true_set = len(y_true_set)
+    dict_pred = [[] for i in range(len_y_true_set)]
     for i in range(sample_size):
-        if y_true[i] not in dict_pred:
-            dict_pred[y_true[i]] = []
-        dict_pred[y_true[i]].append(y_pred[i])
+        y_true_index = y_true_set.index(y_true[i])
+        dict_pred[y_true_index].append(y_pred[i])
     
     # сортировка внутри словаря
-    for y_true_sample in y_true_set:
+    for y_true_sample in range(len_y_true_set):
         dict_pred[y_true_sample].sort()
 
     # вычисление ROC AUC
     sum_numerator = 0
     sum_divisor = 0
-    len_y_true_set = len(y_true_set)
+    
     for y_true_left in range(len_y_true_set-1):
-        name_y_true_left = y_true_set[y_true_left]
         for y_true_right in range(y_true_left + 1, len_y_true_set):
-            name_y_true_right = y_true_set[y_true_right]
-            array_left = dict_pred[name_y_true_left]
-            array_right = dict_pred[name_y_true_right]
-            len_array_left = len(array_left)
-            len_array_right = len(array_right)
+            len_array_left = len(dict_pred[y_true_left])
+            len_array_right = len(dict_pred[y_true_right])
 
             sum_divisor += len_array_left * len_array_right
             right_previous = 0
             for left in range(len_array_left):
                 is_first_occurrence = True
                 for right in range(right_previous, len_array_right):
-                    if array_left[left] < array_right[right]:
+                    if dict_pred[y_true_left][left] < dict_pred[y_true_right][right]:
                         sum_numerator += len_array_right - right
                         if is_first_occurrence:
                             right_previous = right
                             is_first_occurrence = False
                         break
-                    elif array_left[left] == array_right[right]:
+                    elif dict_pred[y_true_left][left] == dict_pred[y_true_right][right]:
                         sum_numerator += 0.5
                         if is_first_occurrence:
                             right_previous = right
