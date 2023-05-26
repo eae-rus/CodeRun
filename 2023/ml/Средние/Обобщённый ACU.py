@@ -12,13 +12,22 @@ def main():
 
     # Сортировка массивов y_true и y_pred по возрастанию y_true
     y_true_set = sorted(set(y_true))
+    dict_pred = {}
     new_y_true = []
     new_y_pred = []
+    for i in range(sample_size):
+        if dict_pred.get(y_true[i]) == None:
+            dict_pred[y_true[i]] = []
+            dict_pred[y_true[i]].append(y_pred[i])
+        else:
+            dict_pred[y_true[i]].append(y_pred[i])
+
     for y_true_sample in y_true_set:
-        for i in range(sample_size):
-            if y_true[i] == y_true_sample:
-                new_y_true.append(y_true[i])
-                new_y_pred.append(y_pred[i])
+        for y_pred_sample in dict_pred[y_true_sample]:
+            new_y_true.append(y_true_sample)
+            new_y_pred.append(y_pred_sample)
+                
+        # TODO: Добавить сортировку по pred, и потом использовать это в следующем массиве
 
     # Итерация по отсортированным массивам с двумя указателями
     left, right = 0, 1
