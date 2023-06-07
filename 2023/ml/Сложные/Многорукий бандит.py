@@ -14,7 +14,8 @@ def main():
     # Инициализируем априорные вероятности для каждого автомата
     prob = np.zeros(m)
     for j in range(m):
-        prob[j] = successes[j]/ (successes[j].sum() + failures[j].sum()) 
+        prob[j] = successes[j]/ (successes[j] + failures[j])
+    prob = prob/prob.sum()
     
     for i in range(n):
         # Выбираем автомат на основе текущих вероятностей
