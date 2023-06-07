@@ -32,6 +32,9 @@ def main():
         for j in range(m):
             prob[j] = successes[j]/ (successes[j] + failures[j])
         prob = prob/prob.sum()
+    
+    sys.stdout.flush() # быть может нужно...?
+    n_zero, m_zero = map(int, input().split())
 
 if __name__ == '__main__':
     main()
