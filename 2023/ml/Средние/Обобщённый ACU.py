@@ -1,32 +1,31 @@
-import numpy as np
-
 def main():
-    '''
-    Сперва бы разобраться, как это вообще считается...
-    Вроде бы с горем-пополам, разобрался...
-    '''
-    sample_size = int(input())
-    y_true, y_pred = [], []
-    for i in range(sample_size):
-        y_true_sample, y_pred_sample  = map(float, input().split())
-        y_true.append(y_true_sample)
-        y_pred.append(y_pred_sample)
+    # Читаем входные данные
+    n = int(input())
+    data = []
+    for i in range(n):
+        t, y = map(float, input().split())
+        data.append((t, y))
 
-    y_pred_diff = np.subtract.outer(y_pred, y_pred)
-    y_true_diff = np.subtract.outer(y_true, y_true)
+    # Сортируем массив предсказаний модели по возрастанию
+    data = sorted(data, key=lambda x: x[1])
 
-    numerator = np.sum((np.sign(y_pred_diff) > 0) & (np.sign(y_true_diff) > 0))
-    numerator += 0.5 * np.sum((np.sign(y_pred_diff) == 0) & (np.sign(y_true_diff) > 0))
-    numerator += np.sum((np.sign(y_pred_diff) < 0) & (np.sign(y_true_diff) < 0))
-    numerator += 0.5 * np.sum((np.sign(y_pred_diff) == 0) & (np.sign(y_true_diff) < 0))
+    # Считаем количество пар объектов (i, j), где i < j и y_i > y_j
+    count = 0
+    for i in range(n):
+        for j in range(i + 1, n):
+            if data[i][0] > data[j][0]:
+                count += 1
+            elif data[i][0] == data[j][0]:
+                count += 0.5
 
-    denominator = sample_size*sample_size - np.sum(y_true_diff == 0)
-
-    if denominator == 0:
-        return 0.0
+    # Вычисляем AUC
+    if count == 0:
+        auc = 0.0
     else:
-        auc = numerator / denominator
-        print(auc)
+        auc = count / (n * (n - 1) / 2)
+
+    # Выводим результат
+    print('{:.6f}'.format(auc))
 
 if __name__ == '__main__':
     main()
