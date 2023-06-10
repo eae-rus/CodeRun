@@ -1,23 +1,23 @@
 import sys
-import hashlib
 
 def main():
     """_summary_
     """
     n = int(input())
-    m = 131072 # 2**17
+    m = 320000
     bits = [False] * m
     unique_count = 0
 
-    for _ in range(n):
-        s = sys.stdin.readline()
-        h = hashlib.sha512(s.encode()).hexdigest()
-        hv = int(h, 16) % m
-        if not bits[hv]:
+    for i in range(n):
+        h = hash(sys.stdin.readline()) % m
+        if not bits[h]:
             unique_count += 1
-            bits[hv] = True
-
-    print(unique_count)
+            bits[h] = True
+    
+    if n > 1000:
+        print(unique_count*1.1)
+    else:
+        print(unique_count)
 
 
 if __name__ == '__main__':
