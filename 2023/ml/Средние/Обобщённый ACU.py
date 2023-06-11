@@ -16,39 +16,45 @@ def main():
         dict_pred[y_true_sample].append(y_pred_sample)
         dict_pred_len[y_true_sample] += 1
 
+    unic_name.sort()
+    # сортировка внутри словаря
+    for name in unic_name:
+        dict_pred[name].sort()
+
     # вычисление ROC AUC
     sum_numerator = 0
     sum_divisor = 0
+    left_for_divisor = 0
+    
     unic_name_len = len(unic_name)
     while unic_name_len > 1:
         name_one = unic_name.pop()
         unic_name_len -= 1
-        array_one = dict_pred[name_one]
         
-        for name_two in unic_name:
-            array_two = dict_pred[name_two]
-            sum_divisor += dict_pred_len[name_one] * dict_pred_len[name_two]
-
-            if name_one < name_two:
-                for i in range(dict_pred_len[name_one]):
-                    for j in range(dict_pred_len[name_two]):
-                        if array_one[i] < array_two[j]:
-                            sum_numerator += 1
-                        elif array_one[i] == array_two[j]:
-                            sum_numerator += 0.5
-            else: # name_one > name_two, вариант "==" невозможен
-                for i in range(dict_pred_len[name_one]):
-                    for j in range(dict_pred_len[name_two]):
-                        if array_one[i] > array_two[j]:
-                            sum_numerator += 1
-                        elif array_one[i] == array_two[j]:
-                            sum_numerator += 0.5
+        left_for_divisor += dict_pred_len[name_one]
+        sum_divisor += dict_pred_len[name_one] * (sample_size - left_for_divisor)
+        for name_two in unic_name:      
+            right_previous = 0
+            for left in range(dict_pred_len[name_one]):
+                is_first_occurrence = True
+                for right in range(right_previous, dict_pred_len[name_two]):
+                    if dict_pred[name_one][left] < dict_pred[name_two][right]:
+                        sum_numerator += dict_pred_len[name_two] - right
+                        if is_first_occurrence:
+                            right_previous = right
+                            is_first_occurrence = False
+                        break
+                    elif dict_pred[name_one][left] == dict_pred[name_two][right]:
+                        sum_numerator += 0.5
+                        if is_first_occurrence:
+                            right_previous = right
+                            is_first_occurrence = False
 
     # Вычисление AUC
     if sum_divisor == 0:
         auc = 0.0
     else:
-        auc = sum_numerator / sum_divisor
+        auc = 1 - sum_numerator / sum_divisor
 
     print(auc)
 
