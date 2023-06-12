@@ -41,19 +41,22 @@ def main():
                     sum_numerator += local_sum_numerator
                     continue
                 local_sum_numerator = 0
-                for right in range(right_previous, dict_pred_len[name_two]):
+                right = right_previous
+                while right < dict_pred_len[name_two]:
                     if dict_pred[name_one][left] < dict_pred[name_two][right]:
                         local_sum_numerator += dict_pred_len[name_two] - right
                         if is_first_occurrence:
                             right_previous = right
-                            is_first_occurrence = False
                         break
                     elif dict_pred[name_one][left] == dict_pred[name_two][right]:
                         local_sum_numerator += 0.5
                         if is_first_occurrence:
                             right_previous = right
                             is_first_occurrence = False
+                    right += 1
                 sum_numerator += local_sum_numerator
+                if right == dict_pred_len[name_two] and is_first_occurrence:
+                    break
 
     # Вычисление AUC
     if sum_divisor == 0:
