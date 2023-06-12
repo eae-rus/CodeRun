@@ -1,43 +1,27 @@
+from sklearn.tree import DecisionTreeClassifier
 import numpy as np
 
 def main():
     '''
     '''
+    # Загрузка данных
     n, m = map(int, input().split())
-
-    # Создание матрицы T
     T = np.zeros((n, n))
-    max_T = 1
+
     for i in range(m):
-        a, b = map(int, input().split())
-        if T[a-1][b-1] == 0:
-            T[a-1][b-1] = 1
-        else:
-            T[a-1][b-1] += 1
-            if T[a-1][b-1] > max_T:
-                max_T = T[a-1][b-1]
-    
-    # корректируем амплитуду
-    T = T / max_T
-    
-    # Инициализация вектора p
-    p = np.ones((n, 1)) / n
+        ai, aj = map(int, input().split())
+        T[ai-1, aj-1] += 1
 
-    # Параметры алгоритма PageRank
-    d = 0.99  # Коэффициент затухания
-    eps = 1e-6  # Порог сходимости
+    # Обучение дерева решений
+    model = DecisionTreeClassifier()
+    model.fit(T, np.arange(n))
 
-    # Алгоритм PageRank
-    while True:
-        p_new = (1 - d) / n + d * (T @ p + (1 - d) / n * np.ones((n, 1)))
-        if np.linalg.norm(p_new - p) < eps:
-            break
-        p = p_new
+    # Получение предсказаний и вывод результата
+    predictions = model.predict(T)
+    sorted_indices = np.argsort(predictions)
 
-    # Вывод порядковых номеров объектов, отсортированных по убыванию значений вектора p
-    order = np.argsort(-p.flatten())
-    for i in order:
-        print(i+1)
+    for index in sorted_indices:
+        print(index+1)
     
 
 
