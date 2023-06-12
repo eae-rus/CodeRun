@@ -2,53 +2,64 @@ def main():
     '''
     Сперва бы разобраться, как это вообще считается...
     Вроде бы с горем-пополам, разобрался...
-    
-    Через многие терни и подсказку добрался к алгориму "разделяй и властвуй"
     '''
-    def auc_divide_conquer(y_true, y_pred):
-        """
-        Находит обобщенный AUC (Area Under the ROC Curve) с помощью алгоритма "Divide & Conquer".
-        """
-        n = len(y_true)
-
-        if n <= 1:
-            return 0, 0
-
-        sum_numerator, sum_divisor = 0, 0
-
-        left_auc_sum_numerator, left_auc_sum_divisor = auc_divide_conquer(y_true[:n//2], y_pred[:n//2])
-        right_auc_sum_numerator, right_auc_sum_divisor = auc_divide_conquer(y_true[n//2:], y_pred[n//2:])
-
-        sum_numerator = left_auc_sum_numerator + right_auc_sum_numerator
-        sum_divisor = left_auc_sum_divisor + right_auc_sum_divisor
-        for i in range(n//2):
-            for j in range(n//2, n):
-                if y_true[i] > y_true[j]:
-                    sum_divisor += 1
-                    if y_pred[i] > y_pred[j]:
-                        sum_numerator += 1
-                    elif y_pred[i] == y_pred[j]:
-                        sum_numerator += 0.5
-                elif y_true[i] < y_true[j]:
-                    sum_divisor += 1
-                    if y_pred[i] < y_pred[j]:
-                        sum_numerator += 1
-                    elif y_pred[i] == y_pred[j]:
-                        sum_numerator += 0.5
-                else: # y_true[i] == y_true[j]
-                    continue
-                
-        return sum_numerator, sum_divisor
-    
     sample_size = int(input())
-    y_true, y_pred = [0] * sample_size, [0] * sample_size
+    dict_pred = {}
+    dict_pred_len = {}
+    unic_name = []
     for i in range(sample_size):
-        y_true_sample, y_pred_sample = map(float, input().split())
-        y_true[i] = y_true_sample
-        y_pred[i] = y_pred_sample
+        y_true_sample, y_pred_sample  = map(float, input().split())
+        if y_true_sample not in dict_pred:
+            dict_pred[y_true_sample] = []
+            dict_pred_len[y_true_sample] = 0
+            unic_name.append(y_true_sample)
+        dict_pred[y_true_sample].append(y_pred_sample)
+        dict_pred_len[y_true_sample] += 1
+
+    unic_name.sort()
+    # сортировка внутри словаря
+    for name in unic_name:
+        dict_pred[name].sort()
+
+    # вычисление ROC AUC
+    sum_numerator = 0
+    sum_divisor = 0
+    left_for_divisor = 0
     
-    sum_numerator, sum_divisor = auc_divide_conquer(y_true, y_pred)
-    auc = sum_numerator / sum_divisor
+    unic_name_len = len(unic_name)
+    while unic_name_len > 1:
+        name_one = unic_name.pop()
+        unic_name_len -= 1
+        
+        left_for_divisor += dict_pred_len[name_one]
+        sum_divisor += dict_pred_len[name_one] * (sample_size - left_for_divisor)
+        for name_two in unic_name:      
+            right_previous = 0
+            for left in range(dict_pred_len[name_one]):
+                is_first_occurrence = True
+                if left > 0 and dict_pred[name_one][left-1] == dict_pred[name_one][left]:
+                    sum_numerator += local_sum_numerator
+                    continue
+                local_sum_numerator = 0
+                for right in range(right_previous, dict_pred_len[name_two]):
+                    if dict_pred[name_one][left] < dict_pred[name_two][right]:
+                        local_sum_numerator += dict_pred_len[name_two] - right
+                        if is_first_occurrence:
+                            right_previous = right
+                            is_first_occurrence = False
+                        break
+                    elif dict_pred[name_one][left] == dict_pred[name_two][right]:
+                        local_sum_numerator += 0.5
+                        if is_first_occurrence:
+                            right_previous = right
+                            is_first_occurrence = False
+                sum_numerator += local_sum_numerator
+
+    # Вычисление AUC
+    if sum_divisor == 0:
+        auc = 0.0
+    else:
+        auc = 1 - sum_numerator / sum_divisor
 
     print(auc)
 
