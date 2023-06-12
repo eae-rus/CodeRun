@@ -16,16 +16,12 @@ def main():
             T[a-1][b-1] += 1
             if T[a-1][b-1] > max_T:
                 max_T = T[a-1][b-1]
-
-    # Нормализация матрицы T по строкам
-    row_sums = T.sum(axis=1)
-    T_norm = np.zeros((n, n))
-    for i in range(n):
-        if row_sums[i] != 0:
-            T_norm[i] = T_norm[i] / row_sums[i]
-
+    
+    # корректируем амплитуду
+    T = T / max_T
+    
     # Инициализация вектора p
-    p = np.ones((n, 1))
+    p = np.ones((n, 1)) / n
 
     # Параметры алгоритма PageRank
     d = 0.99  # Коэффициент затухания
@@ -33,7 +29,7 @@ def main():
 
     # Алгоритм PageRank
     while True:
-        p_new = (1 - d) / n + d * (T_norm @ p + (1 - d) / n * np.ones((n, 1)))
+        p_new = (1 - d) / n + d * (T @ p + (1 - d) / n * np.ones((n, 1)))
         if np.linalg.norm(p_new - p) < eps:
             break
         p = p_new
@@ -42,6 +38,8 @@ def main():
     order = np.argsort(-p.flatten())
     for i in order:
         print(i+1)
+    
+
 
 if __name__ == '__main__':
-    main()
+	main()
