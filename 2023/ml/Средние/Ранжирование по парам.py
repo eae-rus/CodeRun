@@ -16,9 +16,9 @@ def main():
     
     # сортировка по приоритетам
     for i in range(n-1):
-        for j in range(i, n):
+        for j in range(i+1, n):
             if T[i][j] > 0 and T[j][i] > 0:
-                if T[i][j] > T[j][i]:
+                if T[i][j] >= T[j][i]:
                     T[i][j] = 1
                     T[j][i] = 0
                 else:
@@ -33,12 +33,12 @@ def main():
     p = np.ones((n, 1)) / n
 
     # Параметры алгоритма PageRank
-    d = 0.99  # Коэффициент затухания
-    eps = 1e-6  # Порог сходимости
+    d = 0.9999  # Коэффициент затухания
+    eps = 1e-10  # Порог сходимости
 
     # Алгоритм PageRank
     while True:
-        p_new = (1 - d) / n + d * (T @ p + (1 - d) / n * np.ones((n, 1)))
+        p_new = (1 - d) / n + d * T @ p
         if np.linalg.norm(p_new - p) < eps:
             break
         p = p_new
