@@ -10,15 +10,15 @@ def main():
         if len(y_true) < 2:
             return 0, 0
         elif len(y_true) == 2:
-            if y_true[0] < y_true[1]:
+            if y_true[0] == y_true[1]:
+                return 0, 0
+            elif y_true[0] < y_true[1]:
                 if y_pred[0] < y_pred[1]:
                     return 1, 1
                 elif y_pred[0] == y_pred[1]:
                     return 0.5, 1
                 else:
                     return 0, 1
-            elif y_true[0] == y_true[1]:
-                return 0, 0
             else: # y_true[start] > y_true[end]
                 if y_pred[0] > y_pred[1]:
                     return 1, 1
@@ -37,7 +37,9 @@ def main():
         
         for i in range(mid):
             for j in range(mid, len(y_true)):
-                if y_true[i] < y_true[j]:
+                if y_true[i] == y_true[j]:
+                    continue
+                elif y_true[i] < y_true[j]:
                     if y_pred[i] < y_pred[j]:
                         numerator += 1
                         divisor += 1
@@ -47,8 +49,6 @@ def main():
                     else: # y_pred[i] > y_pred[j]
                         numerator += 0
                         divisor += 1
-                elif y_true[i] == y_true[j]:
-                    continue
                 else: # y_true[i] > y_true[j]
                     if y_pred[i] > y_pred[j]:
                         numerator += 1
