@@ -6,37 +6,37 @@ def main():
     Если это заработает - то будет чудом))
     Надеюсь всё же доразделялся))
     '''
-    def calculate_auc(y_true, y_pred, start, end):
-        if end - start < 1:
+    def calculate_auc(y_true, y_pred):
+        if len(y_true) < 2:
             return 0, 0
-        elif end - start == 1:
-            if y_true[start] < y_true[end]:
-                if y_pred[start] < y_pred[end]:
+        elif len(y_true) == 2:
+            if y_true[0] < y_true[1]:
+                if y_pred[0] < y_pred[1]:
                     return 1, 1
-                elif y_pred[start] == y_pred[end]:
+                elif y_pred[0] == y_pred[1]:
                     return 0.5, 1
                 else:
                     return 0, 1
-            elif y_true[start] == y_true[end]:
+            elif y_true[0] == y_true[1]:
                 return 0, 0
             else: # y_true[start] > y_true[end]
-                if y_pred[start] > y_pred[end]:
+                if y_pred[0] > y_pred[1]:
                     return 1, 1
-                elif y_pred[start] == y_pred[end]:
+                elif y_pred[0] == y_pred[1]:
                     return 0.5, 1
                 else:
                     return 0, 1
 
-        mid = (start + end) // 2
+        mid = len(y_true) // 2
 
-        left_numerator, left_divisor = calculate_auc(y_true, y_pred, start, mid)
-        right_numerator, right_divisor = calculate_auc(y_true, y_pred, mid, end)
+        left_numerator, left_divisor = calculate_auc(y_true[:mid], y_pred[:mid])
+        right_numerator, right_divisor = calculate_auc(y_true[mid:], y_pred[mid:])
 
         numerator = left_numerator + right_numerator
         divisor = left_divisor + right_divisor
         
-        for i in range(start, mid):
-            for j in range(mid+1, end+1):
+        for i in range(mid):
+            for j in range(mid, len(y_true)):
                 if y_true[i] < y_true[j]:
                     if y_pred[i] < y_pred[j]:
                         numerator += 1
@@ -71,7 +71,7 @@ def main():
         y_pred[i] = y_pred_sample
 
     # вычисление ROC AUC
-    sum_numerator, sum_divisor = calculate_auc(y_true, y_pred, 0, sample_size-1)
+    sum_numerator, sum_divisor = calculate_auc(y_true, y_pred)
 
     # Вычисление AUC
     auc = sum_numerator / sum_divisor
