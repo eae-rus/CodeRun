@@ -1,6 +1,6 @@
 import os
-from sklearn.cluster import KMeans
 import numpy as np
+from sklearn.mixture import GaussianMixture
 
 def main():
     '''
@@ -55,9 +55,12 @@ def main():
                 
             X_new[i, -1] = x_len / X_max_len
         
-        # Кластеризуем строки с помощью k-средних
-        kmeans = KMeans(n_clusters=2, random_state=0)
-        preds = kmeans.fit_predict(X_new)
+        # Создание модели
+        gmm = GaussianMixture(n_components=10, random_state=0)
+        # Оценка параметров модели
+        gmm.fit(X_new)
+        # Кластеризация данных
+        preds = gmm.predict(X_new)
         
         # Выводим результаты
         for pred in preds:
