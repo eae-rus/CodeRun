@@ -5,50 +5,41 @@ def main():
  
     Если это заработает - то будет чудом))
     '''
-    def calculate_sum_numerator(lowwer, lowwer_len, upper, upper_len):
-        sum_numerator = 0
-        right_previous = 0
-        if lowwer_len <= upper_len:
-            for left in range(lowwer_len):
-                is_first_occurrence = True
-                if left > 0 and lowwer[left-1] == lowwer[left]:
-                    sum_numerator += local_sum_numerator
-                    continue
-                local_sum_numerator = 0
-                for right in range(right_previous, upper_len):
-                    if lowwer[left] < upper[right]:
-                        local_sum_numerator += upper_len - right
-                        if is_first_occurrence:
-                            right_previous = right
-                            is_first_occurrence = False
-                        break
-                    elif lowwer[left] == upper[right]:
-                        local_sum_numerator += 0.5
-                        if is_first_occurrence:
-                            right_previous = right
-                            is_first_occurrence = False
-                sum_numerator += local_sum_numerator
-        else:
-            for left in range(upper_len):
-                is_first_occurrence = True
-                if left > 0 and upper[-left-1] == upper[-left]:
-                    sum_numerator += local_sum_numerator
-                    continue
-                local_sum_numerator = 0
-                for right in range(right_previous, lowwer_len):
-                    if upper[-left-1] > lowwer[-right-1]:
-                        local_sum_numerator += lowwer_len - right
-                        if is_first_occurrence:
-                            right_previous = right
-                            is_first_occurrence = False
-                        break
-                    elif upper[-left-1] == lowwer[-right-1]:
-                        local_sum_numerator += 0.5
-                        if is_first_occurrence:
-                            right_previous = right
-                            is_first_occurrence = False
-                sum_numerator += local_sum_numerator
-        return sum_numerator
+    def calculate_numerator(array_1, start_1, end_1, array_2, start_2, end_2):
+        if end_1 - start_1 < 1 and end_2 - start_2 < 1:
+            return 0
+        elif end_1 - start_1 <= 1 and end_2 - start_2 <= 1:
+            if array_1[start_1] < array_2[start_2]:
+                return 1
+            elif array_1[start_1] == array_2[start_2]:
+                return 0.5
+            else:
+                return 0
+
+        mid_1 = (start_1 + end_1) // 2
+        mid_2 = (start_2 + end_2) // 2
+
+        left_numerator = calculate_numerator(array_1, start_1, mid_1, array_2, start_2, mid_2)
+        right_numerator = calculate_numerator(array_1, mid_1, end_1, array_2, mid_2, end_2)
+
+        numerator = left_numerator + right_numerator
+
+        if end_1 - start_1 > 1 and end_2 - start_2 > 1:
+            for i in range(start_1, mid_1):
+                for j in range(mid_2, end_2):
+                    if array_1[i] < array_2[j]:
+                        numerator += 1
+                    elif array_1[i] == array_2[j]:
+                        numerator += 0.5
+
+            for i in range(mid_1, end_1):
+                for j in range(start_2, mid_2):
+                    if array_1[i] < array_2[j]:
+                        numerator += 1
+                    elif array_1[i] == array_2[j]:
+                        numerator += 0.5
+
+        return numerator
     
     
     sample_size = int(input())
@@ -64,34 +55,37 @@ def main():
         dict_pred[y_true_sample].append(y_pred_sample)
         dict_pred_len[y_true_sample] += 1
 
+    pred = []
+    pred_len = []
     unic_name.sort()
-    # сортировка внутри словаря
+    # Создание единого массива
     for name in unic_name:
-        dict_pred[name].sort()
+        for x in dict_pred[name]:
+            pred.append(x)
+        pred_len.append(dict_pred_len[name])
 
     # вычисление ROC AUC
     sum_numerator = 0
     sum_divisor = 0
-    left_for_divisor = 0
     
-    unic_name_len = len(unic_name)
-    while unic_name_len > 1:
-        name_upper = unic_name.pop() # идём в обратную сторону, значит name_one > name_two
-        unic_name_len -= 1
-        
-        left_for_divisor += dict_pred_len[name_upper]
-        sum_divisor += dict_pred_len[name_upper] * (sample_size - left_for_divisor)
-        for name_lowwer in unic_name:      
-            sum_numerator += calculate_sum_numerator(dict_pred[name_lowwer], dict_pred_len[name_lowwer],
-                                                     dict_pred[name_upper], dict_pred_len[name_upper])
+    coordinates = 0
+    for iteration in range(len(pred_len)-1):
+        coordinates += pred_len[iteration]
+        sum_divisor += pred_len[iteration] * (sample_size - coordinates)
+        sum_numerator += calculate_numerator(pred[coordinates-pred_len[iteration]: coordinates], 0, pred_len[iteration],
+                                             pred[coordinates: sample_size], 0, sample_size - coordinates)
+        #for i in range(coordinates-pred_len[iteration], coordinates):
+        #    for j in range(coordinates, sample_size):
+        #        if pred[i] == pred[j]:
+        #            sum_numerator += 0.5
+        #        elif pred[i] < pred[j]:
+        #            sum_numerator += 1
 
     # Вычисление AUC
-    if sum_divisor == 0:
-        auc = 0.0
-    else:
-        auc = sum_numerator / sum_divisor
+    auc = sum_numerator / sum_divisor
 
     print(auc)
+
 
 if __name__ == '__main__':
     main()
