@@ -4,69 +4,86 @@ def main():
     Вроде бы с горем-пополам, разобрался...
  
     Если это заработает - то будет чудом))
-    Новая версия "двойные словари", немного изменил алгоритм определение "справа" при формировании словаря
+    источник
+    https://www.geeksforgeeks.org/inversion-count-in-array-using-merge-sort/
     '''
+    def merge_sort(data):
+        if len(data) <= 1:
+            return data, 0, 0
+        elif len(data) == 2:
+            return merge(data[:1], data[1:])
+        else:
+            mid = len(data) // 2
+            left, numerator_left, divisor_left = merge_sort(data[:mid])
+            right, numerator_right, divisor_right = merge_sort(data[mid:])
+            merged, numerator_merge, divisor_merge = merge(left, right)
+            numerator = numerator_left + numerator_right + numerator_merge
+            divisor = divisor_left + divisor_right + divisor_merge
+            return merged, numerator, divisor
+
+    def merge(left, right):
+        merged = []
+        i, j, numerator, divisor = 0, 0, 0, 0
+        while i < len(left) and j < len(right):
+            if left[i][0] < right[j][0]:
+                merged.append(left[i])
+                divisor += len(right) - j
+                for k in range(j, len(right)):
+                    if left[i][1] < right[k][1]:
+                        numerator += 1
+                    elif left[i][1] == right[k][1]:
+                        numerator += 0.5
+                i += 1
+            elif left[i][0] == right[j][0]:
+                merged.append(left[i])
+                for z in range(j, len(right)):
+                    if left[i][0] < right[z][0]:
+                        divisor += len(right) - z
+                        for k in range(z, len(right)):
+                            if left[i][1] < right[k][1]:
+                                numerator += 1
+                            elif left[i][1] == right[k][1]:
+                                numerator += 0.5
+                        break
+                
+                merged.append(right[j])
+                for z in range(i, len(left)):
+                    if left[z][0] > right[j][0]:
+                        divisor += len(left) - z
+                        for k in range(z, len(left)):
+                            if left[k][1] > right[j][1]:
+                                numerator += 1
+                            elif left[k][1] == right[j][1]:
+                                numerator += 0.5
+                        break
+                                 
+                i += 1
+                j += 1 
+            else: # left[i][0] > right[j][0]
+                merged.append(right[j])
+                divisor += len(left) - i
+                for k in range(i, len(left)):
+                    if left[k][1] > right[j][1]:
+                        numerator += 1
+                    elif left[k][1] == right[j][1]:
+                        numerator += 0.5
+                j += 1
+                
+
+        merged += left[i:]
+        merged += right[j:]
+        return merged, numerator, divisor
+
       
     sample_size = int(input())
-    t_dict = {}
-    t_len_dict = {}
-    t_unic = []
-    for i in range(sample_size):
+    data = []
+    for _ in range(sample_size):
         t, y  = map(float, input().split())
-        if t not in t_dict:
-            t_dict[t] = {}
-            t_len_dict[t] = 0
-            t_unic.append(t)
-        if y not in t_dict[t]:
-            t_dict[t][y] = [0, 0] # 0 - своих чисел, 1 - чисел свои+справа
-        t_dict[t][y][0] += 1
-        t_len_dict[t] += 1
+        data.append((t, y))
 
-    # сортировка уникальных "t"
-    t_unic.sort()
-    # Создание словаря уникальных "y" в каждом подмасиве "t" и их сортировка
-    y_unic = {}
-    y_len_dict = {}
-    for t in t_unic:
-        y_unic_keys = list(t_dict[t].keys())
-        y_unic_keys.sort()
-        y_unic[t] = y_unic_keys
-        y_len_dict[t] = len(y_unic[t])
-
-    for i_t in range(1, len(t_unic)):
-        t = t_unic[i_t]
-        y_0 = y_unic[t][-1]
-        t_dict[t][y_0][1] = t_dict[t][y_0][0]
-        for i_y in range(2,y_len_dict[t]+1):
-            y_i = y_unic[t][-i_y]
-            y_i_1 = y_unic[t][-i_y+1]
-            t_dict[t][y_i][1] = t_dict[t][y_i_1][1] + t_dict[t][y_i][0]
-
-    # вычисление ROC AUC
-    sum_numerator = 0
-    sum_divisor = 0
-    for t_low_index in range(len(t_unic)-1):
-        t_low_name = t_unic[t_low_index]
-        for t_up_index in range(t_low_index+1, len(t_unic)):
-            t_up_name = t_unic[t_up_index]
-            sum_divisor += t_len_dict[t_low_name] * t_len_dict[t_up_name]
-            
-            i, j = 0, 0
-            while i < y_len_dict[t_low_name] and j < y_len_dict[t_up_name]:
-                y_i = y_unic[t_low_name][i]
-                y_j = y_unic[t_up_name][j]
-                
-                if y_i == y_j:
-                    sum_numerator += 0.5 * t_dict[t_low_name][y_i][0] * t_dict[t_up_name][y_j][0]
-                    j += 1
-                elif y_i < y_j:
-                    sum_numerator += t_dict[t_low_name][y_i][0] * t_dict[t_up_name][y_j][1]
-                    i += 1
-                else:
-                    j += 1
-
+    data, numerator, divisor = merge_sort(data)
     # Вычисление AUC
-    auc = sum_numerator / sum_divisor
+    auc = numerator / divisor
 
     print(auc)
 
