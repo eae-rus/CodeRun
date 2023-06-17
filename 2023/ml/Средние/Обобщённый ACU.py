@@ -4,78 +4,66 @@ def main():
     Вроде бы с горем-пополам, разобрался...
  
     Если это заработает - то будет чудом))
-    "сортировка в сортировке"
+    Новая версия "двойные словари", немного изменил алгоритм определение "справа" при формировании словаря
     '''
-    def calculate_numerator(lowwer, upper):
-        sum_numerator = 0
-        
-        lowwer.sort()
-        upper.sort()
-        i, j = 0, 0
-        lowwer_len = len(lowwer)
-        upper_len = len(upper)
-        is_first = True
-        previous_j = 0
-        
-        while i < lowwer_len and j < upper_len:
-            y_i = lowwer[i]
-            y_j = upper[j]
-            
-            if y_i == y_j:
-                sum_numerator += 0.5
-                if is_first:
-                    is_first = False
-                    previous_j = j
-                j += 1
-                if not is_first and j == upper_len:
-                    is_first = True
-                    j = previous_j
-                    i += 1
-            elif y_i < y_j:
-                sum_numerator += upper_len - j
-                if not is_first:
-                    is_first
-                    j = previous_j
-                i += 1
-            else:
-                j += 1
-            
-        return sum_numerator
-    
-    
+      
     sample_size = int(input())
-    dict_pred = {}
-    dict_pred_len = {}
-    unic_name = []
+    t_dict = {}
+    t_len_dict = {}
+    t_unic = []
     for i in range(sample_size):
-        y_true_sample, y_pred_sample  = map(float, input().split())
-        if y_true_sample not in dict_pred:
-            dict_pred[y_true_sample] = []
-            dict_pred_len[y_true_sample] = 0
-            unic_name.append(y_true_sample)
-        dict_pred[y_true_sample].append(y_pred_sample)
-        dict_pred_len[y_true_sample] += 1
+        t, y  = map(float, input().split())
+        if t not in t_dict:
+            t_dict[t] = {}
+            t_len_dict[t] = 0
+            t_unic.append(t)
+        if y not in t_dict[t]:
+            t_dict[t][y] = [0, 0] # 0 - своих чисел, 1 - чисел свои+справа
+        t_dict[t][y][0] += 1
+        t_len_dict[t] += 1
 
-    pred = []
-    pred_len = []
-    unic_name.sort()
-    # Создание единого массива
-    for name in unic_name:
-        for x in dict_pred[name]:
-            pred.append(x)
-        pred_len.append(dict_pred_len[name])
+    # сортировка уникальных "t"
+    t_unic.sort()
+    # Создание словаря уникальных "y" в каждом подмасиве "t" и их сортировка
+    y_unic = {}
+    y_len_dict = {}
+    for t in t_unic:
+        y_unic_keys = list(t_dict[t].keys())
+        y_unic_keys.sort()
+        y_unic[t] = y_unic_keys
+        y_len_dict[t] = len(y_unic[t])
+
+    for i_t in range(1, len(t_unic)):
+        t = t_unic[i_t]
+        y_0 = y_unic[t][-1]
+        t_dict[t][y_0][1] = t_dict[t][y_0][0]
+        for i_y in range(2,y_len_dict[t]+1):
+            y_i = y_unic[t][-i_y]
+            y_i_1 = y_unic[t][-i_y+1]
+            t_dict[t][y_i][1] = t_dict[t][y_i_1][1] + t_dict[t][y_i][0]
 
     # вычисление ROC AUC
     sum_numerator = 0
     sum_divisor = 0
-    
-    coordinates = 0
-    for iteration in range(len(pred_len)-1):
-        coordinates += pred_len[iteration]
-        sum_divisor += pred_len[iteration] * (sample_size - coordinates)
-        sum_numerator += calculate_numerator(pred[coordinates-pred_len[iteration]: coordinates],
-                                             pred[coordinates: sample_size])
-
+    for t_low_index in range(len(t_unic)-1):
+        t_low_name = t_unic[t_low_index]
+        for t_up_index in range(t_low_index+1, len(t_unic)):
+            t_up_name = t_unic[t_up_index]
+            sum_divisor += t_len_dict[t_low_name] * t_len_dict[t_up_name]
+            
+            i, j = 0, 0
+            while i < y_len_dict[t_low_name] and j < y_len_dict[t_up_name]:
+                y_i = y_unic[t_low_name][i]
+                y_j = y_unic[t_up_name][j]
+                
+                if y_i == y_j:
+                    sum_numerator += 0.5 * t_dict[t_low_name][y_i][0] * t_dict[t_up_name][y_j][0]
+                    j += 1
+                elif y_i < y_j:
+                    sum_numerator += t_dict[t_low_name][y_i][0] * t_dict[t_up_name][y_j][1]
+                    i += 1
+                else:
+                    j += 1
 
     # Вычисление AUC
     auc = sum_numerator / sum_divisor
