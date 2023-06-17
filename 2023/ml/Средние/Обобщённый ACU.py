@@ -4,6 +4,7 @@ def main():
     Вроде бы с горем-пополам, разобрался...
  
     Если это заработает - то будет чудом))
+    ещё долго плясал над сливанием. Блин, добавил слияние, но не назанчил equal
     источник
     https://www.geeksforgeeks.org/inversion-count-in-array-using-merge-sort/
     '''
@@ -23,7 +24,7 @@ def main():
 
     def merge(left, right):
         merged = []
-        i, j, equal_left, equal_right, numerator, divisor = 0, 0, 0, 0, 0, 0
+        i, j, equal_right, numerator, divisor = 0, 0, 0, 0, 0
         while i < len(left) and j < len(right):
             if left[i][0] < right[j][0]:
                 merged.append(left[i])
@@ -40,6 +41,7 @@ def main():
                     equal_right = j
                 for z in range(equal_right, len(right)):
                     if left[i][0] < right[z][0]:
+                        equal_right = z
                         divisor += len(right) - z
                         for k in range(z, len(right)):
                             if left[i][1] < right[k][1]:
@@ -47,22 +49,8 @@ def main():
                             elif left[i][1] == right[k][1]:
                                 numerator += 0.5
                         break
-                
-                merged.append(right[j])
-                if equal_left < i: # счётчик, чтобы не пересчитывать
-                    equal_left = i
-                for z in range(equal_left, len(left)):
-                    if left[z][0] > right[j][0]:
-                        divisor += len(left) - z
-                        for k in range(z, len(left)):
-                            if left[k][1] > right[j][1]:
-                                numerator += 1
-                            elif left[k][1] == right[j][1]:
-                                numerator += 0.5
-                        break
                                  
                 i += 1
-                j += 1 
             else: # left[i][0] > right[j][0]
                 merged.append(right[j])
                 divisor += len(left) - i
