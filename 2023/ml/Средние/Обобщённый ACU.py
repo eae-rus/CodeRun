@@ -23,7 +23,7 @@ def main():
 
     def merge(left, right):
         merged = []
-        i, j, numerator, divisor = 0, 0, 0, 0
+        i, j, equal_left, equal_right, numerator, divisor = 0, 0, 0, 0, 0, 0
         while i < len(left) and j < len(right):
             if left[i][0] < right[j][0]:
                 merged.append(left[i])
@@ -36,7 +36,9 @@ def main():
                 i += 1
             elif left[i][0] == right[j][0]:
                 merged.append(left[i])
-                for z in range(j, len(right)):
+                if equal_right < j: # счётчик, чтобы не пересчитывать
+                    equal_right = j
+                for z in range(equal_right, len(right)):
                     if left[i][0] < right[z][0]:
                         divisor += len(right) - z
                         for k in range(z, len(right)):
@@ -47,7 +49,9 @@ def main():
                         break
                 
                 merged.append(right[j])
-                for z in range(i, len(left)):
+                if equal_left < i: # счётчик, чтобы не пересчитывать
+                    equal_left = i
+                for z in range(equal_left, len(left)):
                     if left[z][0] > right[j][0]:
                         divisor += len(left) - z
                         for k in range(z, len(left)):
