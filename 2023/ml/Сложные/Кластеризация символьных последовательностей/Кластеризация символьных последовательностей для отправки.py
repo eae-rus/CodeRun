@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.mixture import GaussianMixture
+from sklearn.mixture import GaussianMixture as GMM
 
 def main():
     '''
@@ -12,50 +12,25 @@ def main():
         char_to_index[char] = i
         
     # Создаем матрицу, в которой каждый ряд представляет собой закодированную строку 
-    X = []
-    X_max_len = 1
+    X = np.zeros((n, (k-1)*(k+1)), dtype=np.int32)
     for i in range(n):
         string = input()
-        if len(string) > X_max_len:
-            X_max_len = len(string)
-        X.append([char_to_index[char] for char in string])
+        index_0 = char_to_index[string[0]]
+        X[i, index_0] = 1
+        for j in range(1, len(string)):
+            char_index_j_1 = char_to_index[string[j-1]]
+            char_index_j= char_to_index[string[j]]
+            X[i, k-1+char_index_j_1*(k-1)+char_index_j] += 1
         
-    X_new = np.zeros((n, k*(k+1) + 1), dtype=np.float32)
-    for i in range(n):
-        x_len = len(X[i])
-        X_local = np.zeros((k, k+1), dtype=np.float32)
-        
-        for j in range(x_len):
-            char_index_j = X[i][j]
-            if j == 0:
-                X_local[0, char_index_j] = 1
-            if j > 0:
-                char_index_j_1 = X[i][j-1]
-                X_local[char_index_j_1, char_index_j] += 1
-                
-            if j == len(X[i]) - 1:
-                X_local[char_index_j, k] = 1
-                
-        for j in range(k):
-            sum_x_j = X_local[j, :].sum() + 1
-            for k in range(k+1):
-                if X_local[j, k] > 0:
-                    X_local[j, k] /= sum_x_j
-                else:
-                    X_local[j, k] = -1
-        for j in range(k):
-            for z in range(k+1):
-                X_new[i, j*(k+1) + z] = X_local[j, z]
-            
-        X_new[i, -1] = x_len / X_max_len
-
+        index_n = char_to_index[string[len(string)-1]]
+        X[i, k*(k-1)+index_n] = 1
     
+    np.random.seed(1)
     # Создание модели
-    gmm = GaussianMixture(n_components=2, random_state=0)
-    # Оценка параметров модели
-    gmm.fit(X_new)
+    model = GMM(n_components=2, random_state=42, max_iter=1000, covariance_type='full')
+    model.fit(X)
     # Кластеризация данных
-    preds = gmm.predict(X_new)
+    preds = model.predict(X)
     
     # Выводим результаты
     for pred in preds:
