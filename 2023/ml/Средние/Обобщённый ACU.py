@@ -28,8 +28,9 @@ def main():
         Пока прост выкинул расчёт числителя, оптимизировать потом можно будет
         '''
         merged = []
-        i, j, divisor, equal_right = 0, 0, 0, 0
-        while i < len(left) and j < len(right):
+        i, j, divisor = 0, 0, 0, 0
+        equal_right = j
+        while i < len(left) and j <len(right):
             if left[i][0] < right[j][0]:
                 merged.append(left[i])
                 divisor += len(right) - j
@@ -74,12 +75,10 @@ def main():
         i, j = 0, 0
         no_inversionCount = 0 # счётчик "не инверсий" - надо будет ещё понять... по сути это numerator
         extra_points = defaultdict(float) # отсеивание всякой одинаковости.
-        left_len = len(left)
-        right_len = len(right)
-        while i < left_len and j < right_len:
+        while i < len(left) and j < len(right):
             if left[i][1] < right[j][1]: # А здесь сортировка уже по pred
                 merged.append(left[i])
-                no_inversionCount += right_len - j
+                no_inversionCount += len(right) - j
                 extra_points[left[i][0]] += 1 
                 i += 1
             elif left[i][1] == right[j][1]:
@@ -87,12 +86,12 @@ def main():
                 val = left[i][1]
                 repeats = 0
                 j_start = j
-                while j < right_len and right[j][1] == val:
+                while j < len(right) and right[j][1] == val:
                     merged.append(right[j])
                     repeats += 1
                     j += 1
-                while i < left_len and left[i][1] == val:
-                    no_inversionCount += repeats * 0.5 + right_len - j
+                while i < len(left) and left[i][1] == val:
+                    no_inversionCount += repeats * 0.5 + len(right) - j
                     merged.append(left[i])
                     extra_points_eqaul[left[i][0]] += 1
                     i += 1
@@ -107,7 +106,7 @@ def main():
                 j += 1    
 
         merged += left[i:]
-        while j < right_len:
+        while j < len(right):
             merged.append(right[j])
             no_inversionCount -= extra_points[right[j][0]]
             j += 1
