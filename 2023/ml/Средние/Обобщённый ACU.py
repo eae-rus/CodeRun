@@ -5,10 +5,10 @@ def main():
     Сперва бы разобраться, как это вообще считается...
     Вроде бы с горем-пополам, разобрался...
  
-    Если это заработает - то будет чудом))
-    ещё долго плясал над сливанием. Блин, добавил слияние, но не назанчил equal
-    источник
+    Если это заработает - то будет чудом, наконец-то свершилось!!))
     https://www.techiedelight.com/merge-sort/
+    Но вся пляска была с тем, как исключить лишнее при подсчёте слияний.
+    Над этим было много помощи / подсказок...
     '''
     def merge_sort_for_divisor(data):
         if len(data) <= 1:
@@ -57,7 +57,7 @@ def main():
         if len(data) <= 1:
             return data, 0
         elif len(data) == 2:
-            return merge_for_divisor(data[:1], data[1:])
+            return merge_for_numerator(data[:1], data[1:])
         else:
             mid = len(data) // 2
             left, numerator_left = merge_sort_for_numerator(data[:mid])
@@ -134,4 +134,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
