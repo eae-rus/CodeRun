@@ -10,109 +10,139 @@ def main():
     Но вся пляска была с тем, как исключить лишнее при подсчёте слияний.
     Над этим было много помощи / подсказок...
     '''
-    def merge_sort_for_divisor(data):
-        if len(data) <= 1:
+    def merge_sort_for_divisor(data, new_data, start, end):
+        if end - start + 1 <= 1:
             return data, 0
-        elif len(data) == 2:
-            return merge_for_divisor(data[:1], data[1:])
+        elif end - start + 1 == 2:
+            mid = (start + end) // 2
+            return merge_for_divisor(data, new_data, start, mid, end)
         else:
-            mid = len(data) // 2
-            left, divisor_left = merge_sort_for_divisor(data[:mid])
-            right, divisor_right = merge_sort_for_divisor(data[mid:])
-            merged, divisor_merge = merge_for_divisor(left, right)
+            mid = (start + end) // 2
+            data, divisor_left = merge_sort_for_divisor(data, new_data, start, mid)
+            data, divisor_right = merge_sort_for_divisor(data, new_data, mid+1, end)
+            data, divisor_merge = merge_for_divisor(data, new_data, start, mid, end)
             divisor = divisor_left + divisor_right + divisor_merge
-            return merged, divisor
+            return data, divisor
 
-    def merge_for_divisor(left, right):
+    def merge_for_divisor(data, new_data, start, mid, end):
         '''
         Пока прост выкинул расчёт числителя, оптимизировать потом можно будет
         '''
-        merged = []
-        i, j, divisor, equal_right = 0, 0, 0, 0
-        while i < len(left) and j < len(right):
-            if left[i][0] < right[j][0]:
-                merged.append(left[i])
-                divisor += len(right) - j
+        i = start
+        k = start
+        j = mid + 1
+        equal_right = start
+        divisor = 0
+        while i <= mid and j <= end:
+            if data[i][0] < data[j][0]:
+                new_data[k] = data[i]
+                divisor += end + 1 - j
                 i += 1
-            elif left[i][0] == right[j][0]:
-                merged.append(left[i])
+                k += 1
+            elif data[i][0] == data[j][0]:
+                new_data[k] = data[i]
                 if equal_right < j: # счётчик, чтобы не пересчитывать
                     equal_right = j
-                for z in range(equal_right, len(right)):
-                    if left[i][0] < right[z][0]:
-                        equal_right = z
-                        divisor += len(right) - z
-                        break             
+                z = equal_right
+                while z <= end:
+                    if data[i][0] < data[z][0]:
+                        divisor += end + 1 - z
+                        equal_right = z - 1
+                        break
+                    z += 1          
                 i += 1
-            else: # left[i][0] > right[j][0]
-                merged.append(right[j])
-                divisor += len(left) - i
-                j += 1            
+                k += 1
+            else: # data[i][0] > data[j][0]
+                new_data[k] = data[j]
+                divisor += mid + 1 - i
+                j += 1
+                k += 1
 
-        merged += left[i:]
-        merged += right[j:]
-        return merged, divisor
+        while i <= mid:
+            new_data[k] = data[i]
+            i += 1
+            k += 1
+        while j <= end:
+            new_data[k] = data[j]
+            j += 1
+            k += 1
 
-    def merge_sort_for_numerator(data):
-        if len(data) <= 1:
+        for z in range(start, end+1):
+            data[z] = new_data[z]
+
+        return data, divisor
+
+    def merge_sort_for_numerator(data, new_data, start, end):
+        if end - start + 1 <= 1:
             return data, 0
-        elif len(data) == 2:
-            return merge_for_numerator(data[:1], data[1:])
+        elif end - start + 1 == 2:
+            mid = (start + end) // 2
+            return merge_for_numerator(data, new_data, start, mid, end)
         else:
-            mid = len(data) // 2
-            left, numerator_left = merge_sort_for_numerator(data[:mid])
-            right, numerator_right = merge_sort_for_numerator(data[mid:])
-            merged, numerator_merge = merge_for_numerator(left, right)
+            mid = (start + end) // 2
+            data, numerator_left = merge_sort_for_numerator(data, new_data, start, mid)
+            data, numerator_right = merge_sort_for_numerator(data, new_data, mid+1, end)
+            data, numerator_merge = merge_for_numerator(data, new_data, start, mid, end)
             numerator = numerator_left + numerator_right + numerator_merge
-            return merged, numerator
+            return data, numerator
 
-    def merge_for_numerator(left, right):
+    def merge_for_numerator(data, new_data, start, mid, end):
         '''
         А теперь отдельно считаю числителя
         '''
-        merged = []
-        i, j = 0, 0
+        i = start
+        k = start
+        j = mid + 1
         no_inversionCount = 0 # счётчик "не инверсий" - надо будет ещё понять... по сути это numerator
         extra_points = defaultdict(float) # отсеивание всякой одинаковости.
-        left_len = len(left)
-        right_len = len(right)
-        while i < left_len and j < right_len:
-            if left[i][1] < right[j][1]: # А здесь сортировка уже по pred
-                merged.append(left[i])
-                no_inversionCount += right_len - j
-                extra_points[left[i][0]] += 1 
+        while i <= mid and j <= end:
+            if data[i][1] < data[j][1]: # А здесь сортировка уже по pred
+                new_data[k] = data[i]
+                no_inversionCount += end + 1 - j
+                extra_points[data[i][0]] += 1 
                 i += 1
-            elif left[i][1] == right[j][1]:
+                k += 1
+            elif data[i][1] == data[j][1]:
                 extra_points_eqaul = defaultdict(float)
-                val = left[i][1]
+                val = data[i][1]
                 repeats = 0
                 j_start = j
-                while j < right_len and right[j][1] == val:
-                    merged.append(right[j])
+                while j <= end and data[j][1] == val:
+                    new_data[k] = data[j]
                     repeats += 1
                     j += 1
-                while i < left_len and left[i][1] == val:
-                    no_inversionCount += repeats * 0.5 + right_len - j
-                    merged.append(left[i])
-                    extra_points_eqaul[left[i][0]] += 1
+                    k += 1
+                while i <= mid and data[i][1] == val:
+                    no_inversionCount += repeats * 0.5 + end + 1 - j
+                    new_data[k] = data[i]
+                    extra_points_eqaul[data[i][0]] += 1
                     i += 1
+                    k += 1
                 for t in range(j_start, j):
-                    name = right[t][0]
+                    name = data[t][0]
                     no_inversionCount -= 0.5 * extra_points_eqaul[name] + extra_points[name]
                 for key, val in extra_points_eqaul.items():
                     extra_points[key] += val 
-            else: # left[i][1] > right[j][1]
-                merged.append(right[j])
-                no_inversionCount -= extra_points[right[j][0]]
-                j += 1    
+            else: # data[i][1] > data[j][1]
+                new_data[k] = data[j]
+                no_inversionCount -= extra_points[data[j][0]]
+                j += 1
+                k += 1  
 
-        merged += left[i:]
-        while j < right_len:
-            merged.append(right[j])
-            no_inversionCount -= extra_points[right[j][0]]
+        while i <= mid:
+            new_data[k] = data[i]
+            i += 1
+            k += 1
+        while j <= end:
+            new_data[k] = data[j]
+            no_inversionCount -= extra_points[data[j][0]]
             j += 1
+            k += 1
 
-        return merged, no_inversionCount
+        for z in range(start, end+1):
+            data[z] = new_data[z]
+
+        return data, no_inversionCount
 
       
     sample_size = int(input())
@@ -122,9 +152,11 @@ def main():
         data.append((t, y))
 
     # Сперва выравниваем по true
-    data, divisor = merge_sort_for_divisor(data)
+    new_data = data.copy()
+    len_data = len(data)
+    data, divisor = merge_sort_for_divisor(data, new_data, 0, len_data - 1)
     # А потом уже по predict
-    data, numerator = merge_sort_for_numerator(data)
+    data, numerator = merge_sort_for_numerator(data, new_data, 0, len_data - 1)
 
     # Вычисление AUC
     auc = numerator / divisor
