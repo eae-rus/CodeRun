@@ -46,50 +46,19 @@ def main():
     
     # инициализация матриц U и V
     U = np.random.rand(U_value, min_dim)
-    grad_U = np.zeros((U_value, min_dim))
     V = np.random.rand(M_value, min_dim)
-    grad_V = np.zeros((M_value, min_dim))
 
     # обучение модели SVD с регуляризацией
-    learning_rate = 0.1
-    eps = 1e-7
-    lambda_reg = 0.01
-    for epoch in range(1000):
+    alpha = 0.01
+    betta = 0.02
+    for epoch in range(100):
         for i, j, value in zip(U_M_train.nonzero()[0], U_M_train.nonzero()[1], U_M_train.data):
-            prediction_before = np.dot(U[i], V[j].T) #+ mean_rating + user_bias[i] + movie_bias[j]
-            error_before = (value - prediction_before) ** 2
-            error_reg = ((U[i] ** 2).sum() + (V[j] ** 2).sum())
-            error_before += lambda_reg * error_reg
-            
-            # вычисляем градиент функции ошибки по U[i] и V[j]
-            U_for_grad = U[i]
-            V_for_grad = V[j]
+            prediction = np.dot(U[i], V[j].T) #+ mean_rating + user_bias[i] + movie_bias[j]
+            error = (value - prediction)
+
             for k in range(min_dim):
-                U_for_grad[k] += eps
-                prediction = np.dot(U_for_grad, V_for_grad.T) #+ mean_rating + user_bias[i] + movie_bias[j]
-                error = (value - prediction) ** 2
-                diference =  - U[i][k]**2 + U_for_grad[k]**2
-                error += lambda_reg * (error_reg + diference)
-                U_for_grad[k] -= eps
-                grad_U[i][k] += error - error_before
-                
-                V_for_grad[k] += eps
-                prediction = np.dot(U_for_grad, V_for_grad.T) #+ mean_rating + user_bias[i] + movie_bias[j]
-                error = (value - prediction) ** 2
-                diference =  - V[j][k]**2 + V_for_grad[k]**2
-                error += lambda_reg * (error_reg + diference)
-                V_for_grad[k] -= eps
-                grad_V[j][k] += error - error_before
-        if epoch % 100 == 0:
-            lambda_reg /= 2  
-        for i in range(U_value):
-            grad_U[i] /= user_bias_count[i]
-            
-        for j in range(M_value):
-            grad_V[j] /= moveie_bias_count[j]
-        # обновляем значения матриц U и V
-        U -= learning_rate * grad_U / eps 
-        V -= learning_rate * grad_V / eps
+                U[i][k] += alpha * (2* error * V[j][k] - betta * U[i][k])
+                V[j][k] += alpha * (2* error * U[i][k] - betta * V[j][k])
 
     # вычисление предсказаний и вывод результатов
     for _ in range(T_value):
