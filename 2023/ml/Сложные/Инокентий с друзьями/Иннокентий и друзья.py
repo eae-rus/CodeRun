@@ -32,17 +32,15 @@ def main():
     
     # разделям по городам
     orgs_more_100 = orgs[orgs['org_id'].isin(array_index_more_100)]
+    orgs_more_100['count_reviews'] = [0] * orgs_more_100.shape[0]
+    for index in array_index_more_100:
+        orgs_more_100.loc[orgs_more_100['org_id'] == index, 'count_reviews'] = count_orgs_more_100[index]
     orgs_msk = orgs_more_100[orgs_more_100['city'] == 'msk']
-    orgs_msk = orgs_msk[orgs_msk['rating']>3]
+    orgs_msk = orgs_msk[orgs_msk['rating']>4]
+    orgs_msk = orgs_msk.sort_values(by='count_reviews', ascending=False)
     orgs_spb = orgs_more_100[orgs_more_100['city'] == 'spb']
-    orgs_spb = orgs_spb[orgs_spb['rating']>3]
-    
-
-    
-    #users_msk = users[users['city'] == 'msk']
-    #user_spb = users[users['city'] == 'spb']
-    #
-    #reviews_msk = reviews[reviews['org_id'] == 'msk']
+    orgs_spb = orgs_spb[orgs_spb['rating']>4]
+    orgs_spb = orgs_spb.sort_values(by='count_reviews', ascending=False)
     
     head = 10
     results = {}
@@ -51,58 +49,17 @@ def main():
         i += 1
         #if i >= 20:
         #    break
-        print(i)
+        if i % 50:
+            print(i)
         # находим город данного пользователя
         city_user = users.loc[users['user_id'] == user_id].iloc[0]['city']
-        reviews_user = reviews[reviews['user_id'] == user_id].iloc[:]
-        restor_user = reviews_user[reviews_user['rating']>3].iloc[:]['org_id']
         
-        if restor_user.shape[0] > 0:       
-            rubrics = orgs[orgs['org_id'].isin(restor_user)].iloc[:]['rubrics_id']
-
-            if city_user == 'msk':
-                orgs_spb_rubrics = pd.DataFrame()
-                for rubric in rubrics.values:
-                    for rub in rubric.split(' '):
-                        new_orgs = orgs_spb[orgs_spb['rubrics_id'].str.contains(rub)].iloc[:]
-                        orgs_spb_rubrics = pd.concat([orgs_spb_rubrics, new_orgs])
-
-                orgs_spb_bill_sorted = orgs_spb_rubrics.sort_values(by='average_bill')
-                first_10_orgs = orgs_spb_bill_sorted.head(head)
-                results[user_id] = first_10_orgs.loc[:, 'org_id'].values
-            else: # spb
-                orgs_msk_rubrics = pd.DataFrame()
-                for rubric in rubrics.values:
-                    for rub in rubric.split(' '):
-                        new_orgs = orgs_msk[orgs_msk['rubrics_id'].str.contains(rub)].iloc[:]
-                        orgs_msk_rubrics = pd.concat([orgs_msk_rubrics, new_orgs])
-
-                orgs_msk_bill_sorted = orgs_msk_rubrics.sort_values(by='average_bill')
-                first_10_orgs = orgs_msk_bill_sorted.head(head)
-                results[user_id] = first_10_orgs.loc[:, 'org_id'].values
-        else: # нет оценок с рейтингом > 3
-            restor_user = reviews_user.iloc[:]['org_id']
-            # Находим множество average_bill
-            average_bill_str = orgs[orgs['org_id'].isin(restor_user)]['average_bill']
-            average_bill_set = set()
-            for average_bill in average_bill_str.values:
-                bill = average_bill
-                average_bill_set.add(bill)
-
-            average_bill = min(average_bill_set)
-            
-            if city_user == 'msk':
-                orgs_spb_average_bill = orgs_spb[orgs_spb['average_bill'] == average_bill]
-                orgs_spb_bill_sorted = orgs_spb_average_bill.sort_values(by='rating', ascending=False)
-                first_10_orgs = orgs_spb_bill_sorted.head(head)
-                results[user_id] = first_10_orgs.loc[:, 'org_id'].values
-            else: # spb
-                orgs_msk_average_bill = orgs_msk[orgs_msk['average_bill'] == average_bill]
-                orgs_msk_bill_sorted = orgs_msk_average_bill.sort_values(by='rating', ascending=False)
-                first_10_orgs = orgs_msk_bill_sorted.head(head)
-                results[user_id] = first_10_orgs.loc[:, 'org_id'].values
-
-        
+        if city_user == 'msk':
+            first_10_orgs = orgs_spb.head(head)
+            results[user_id] = first_10_orgs.loc[:, 'org_id'].values
+        else: # spb
+            first_10_orgs = orgs_msk.head(head)
+            results[user_id] = first_10_orgs.loc[:, 'org_id'].values
     
     # преобразуем словарь в список кортежей
     data_list = [[key, value] for key, value in results.items()]
