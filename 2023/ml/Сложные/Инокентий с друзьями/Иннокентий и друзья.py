@@ -21,11 +21,23 @@ def main():
     orgs['average_bill'] = orgs['average_bill'].fillna(1000000)
     orgs['features_id'] = orgs['features_id'].fillna('-1')
     
+    count_orgs = reviews['org_id'].value_counts()
+    
+    count_orgs = count_orgs.sort_values(ascending=False)
+    file_path_out = os.path.abspath("") + '\\2023\\ml\\Сложные\\Инокентий с друзьями\\sort_count.csv'
+    count_orgs.to_csv(file_path_out)
+    
+    count_orgs_more_100 = count_orgs[count_orgs.values > 100]
+    array_index_more_100 = list(count_orgs_more_100.index)
+    
     # разделям по городам
-    orgs_msk = orgs[orgs['city'] == 'msk']
+    orgs_more_100 = orgs[orgs['org_id'].isin(array_index_more_100)]
+    orgs_msk = orgs_more_100[orgs_more_100['city'] == 'msk']
     orgs_msk = orgs_msk[orgs_msk['rating']>3]
-    orgs_spb = orgs[orgs['city'] == 'spb']
+    orgs_spb = orgs_more_100[orgs_more_100['city'] == 'spb']
     orgs_spb = orgs_spb[orgs_spb['rating']>3]
+    
+
     
     #users_msk = users[users['city'] == 'msk']
     #user_spb = users[users['city'] == 'spb']
