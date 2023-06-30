@@ -34,10 +34,9 @@ def main():
         restor_user_by_rating = restor_user[restor_user['rating']>3].iloc[:]['org_id']
         
         if restor_user_by_rating.shape[0] == 0:
-            restor_user_by_rating = restor_user[restor_user['rating']==3].iloc[:]['org_id']
- 
-        if restor_user_by_rating.shape[0] == 0:
-           restor_user_by_rating = restor_user.iloc[:]['org_id']       
+            restor_user_by_rating =  restor_user_by_rating_previous
+        
+        restor_user_by_rating_previous = restor_user_by_rating
         
         rubrics = orgs[orgs['org_id'].isin(restor_user_by_rating)].iloc[:]['rubrics_id']
         
@@ -48,8 +47,8 @@ def main():
                     new_orgs = orgs_spb[orgs_spb['rubrics_id'].str.contains(rub)].iloc[:]
                     orgs_spb_rubrics = pd.concat([orgs_spb_rubrics, new_orgs])
 
-            orgs_spb_bill_sorted = orgs_spb_rubrics.sort_values(by='rating', ascending=False)
-            first_10_orgs = orgs_spb_bill_sorted.head(10)
+            orgs_spb_bill_sorted = orgs_spb_rubrics.sort_values(by='average_bill')
+            first_10_orgs = orgs_spb_bill_sorted.head(100)
             results[user_id] = first_10_orgs.loc[:, 'org_id'].values
         else: # spb
             orgs_msk_rubrics = pd.DataFrame()
@@ -59,7 +58,7 @@ def main():
                     orgs_msk_rubrics = pd.concat([orgs_msk_rubrics, new_orgs])
             
             orgs_msk_bill_sorted = orgs_msk_rubrics.sort_values(by='average_bill')
-            first_10_orgs = orgs_msk_bill_sorted.head(10)
+            first_10_orgs = orgs_msk_bill_sorted.head(100)
             results[user_id] = first_10_orgs.loc[:, 'org_id'].values
 
         
