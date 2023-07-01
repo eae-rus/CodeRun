@@ -6,16 +6,16 @@ def main():
     k_value, U_value, M_value, D_value, T_value = map(int, input().split())
     
     U_M_train = np.zeros((U_value, M_value))
-    all_ratings = 0
-    all_ratings_count = 0
+    # all_ratings = 0
+    # all_ratings_count = 0
     for _ in range(D_value):
         user, movie, rating = map(int, input().split())
         rating /= k_value
         # занесение данных в матрицу
         U_M_train[user, movie] = rating
         # вычисления средних
-        all_ratings += rating
-        all_ratings_count += 1
+        # all_ratings += rating
+        # all_ratings_count += 1
 
     # вычисляем среднее значение оценок
     # mean_rating = all_ratings / all_ratings_count
@@ -47,13 +47,13 @@ def main():
             for movie in range(M_value):
                 value = U_M_train[user, movie]
                 if value > 0:
-                    prediction = mean_rating + user_bias[user] + movie_bias[movie] + np.dot(P[user, :], Q[movie, :])
+                    prediction = mean_rating + user_bias[user] + movie_bias[movie] + np.dot(P[user].T, Q[movie])
                     error = (value - prediction)
                     
                     user_bias[user] += learning_rate  * (error - reg_param  * user_bias[user])
                     movie_bias[movie] += learning_rate  * (error - reg_param  * movie_bias[movie])
-                    P[user, :] += learning_rate  * (error * Q[movie, :] - reg_param  * P[user, :])
-                    Q[movie, :] += learning_rate  * (error * P[user, :] - reg_param  * Q[movie, :])
+                    P[user, :] += learning_rate  * (error * Q[movie] - reg_param  * P[user])
+                    Q[movie, :] += learning_rate  * (error * P[user] - reg_param  * Q[movie])
 
     # вычисление предсказаний и вывод результатов
     for _ in range(T_value):
