@@ -6,6 +6,7 @@ def main():
     k_value, U_value, M_value, D_value, T_value = map(int, input().split())
     
     U_M_train = np.zeros((U_value, M_value))
+    user_movie_array = []
     # all_ratings = 0
     # all_ratings_count = 0
     for _ in range(D_value):
@@ -13,6 +14,7 @@ def main():
         rating /= k_value
         # занесение данных в матрицу
         U_M_train[user, movie] = rating
+        user_movie_array.append((user, movie))
         # вычисления средних
         # all_ratings += rating
         # all_ratings_count += 1
@@ -43,17 +45,16 @@ def main():
     learning_rate  = 0.5
     reg_param  = 0.02
     for epoch in range(200):
-        for user in range(U_value):
-            for movie in range(M_value):
-                value = U_M_train[user, movie]
-                if value > 0:
-                    prediction = mean_rating + user_bias[user] + movie_bias[movie] + np.dot(P[user].T, Q[movie])
-                    error = (value - prediction)
-                    
-                    user_bias[user] += learning_rate  * (error - reg_param  * user_bias[user])
-                    movie_bias[movie] += learning_rate  * (error - reg_param  * movie_bias[movie])
-                    P[user] += learning_rate  * (error * Q[movie] - reg_param  * P[user])
-                    Q[movie] += learning_rate  * (error * P[user] - reg_param  * Q[movie])
+        for index in range(len(user_movie_array)):
+            user, movie = user_movie_array[index]
+            value = U_M_train[user, movie]
+            prediction = mean_rating + user_bias[user] + movie_bias[movie] + np.dot(P[user].T, Q[movie])
+            error = (value - prediction)
+            
+            user_bias[user] += learning_rate  * (error - reg_param  * user_bias[user])
+            movie_bias[movie] += learning_rate  * (error - reg_param  * movie_bias[movie])
+            P[user] += learning_rate  * (error * Q[movie] - reg_param  * P[user])
+            Q[movie] += learning_rate  * (error * P[user] - reg_param  * Q[movie])
 
     # вычисление предсказаний и вывод результатов
     for _ in range(T_value):
