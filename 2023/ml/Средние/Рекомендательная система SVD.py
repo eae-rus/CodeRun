@@ -52,8 +52,8 @@ def main():
                     
                     user_bias[user] += learning_rate  * (error - reg_param  * user_bias[user])
                     movie_bias[movie] += learning_rate  * (error - reg_param  * movie_bias[movie])
-                    P[user, :] += learning_rate  * (error * Q[movie] - reg_param  * P[user])
-                    Q[movie, :] += learning_rate  * (error * P[user] - reg_param  * Q[movie])
+                    P[user] += learning_rate  * (error * Q[movie] - reg_param  * P[user])
+                    Q[movie] += learning_rate  * (error * P[user] - reg_param  * Q[movie])
 
     # вычисление предсказаний и вывод результатов
     for _ in range(T_value):
