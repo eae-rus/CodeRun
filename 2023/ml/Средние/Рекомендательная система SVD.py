@@ -1,18 +1,15 @@
 import numpy as np
-from scipy.sparse import csr_matrix
 
 def main():
     # чтение входных данных
     k_value, U_value, M_value, D_value, T_value = map(int, input().split())
     
-    U_M_train = np.zeros((U_value, M_value))
-    user_movie_array = []
+    U_M_train = []
     for _ in range(D_value):
         user, movie, rating = map(int, input().split())
         rating /= k_value
         # занесение данных в матрицу
-        U_M_train[user, movie] = rating
-        user_movie_array.append((user, movie))
+        U_M_train.append((user, movie, rating))
     
     min_dim = 10
     
@@ -28,11 +25,10 @@ def main():
     
     # обучение модели SVD с регуляризацией
     learning_rate  = 0.1
-    reg_param  = 0.05
+    reg_param  = 0.2
     for epoch in range(9):
-        for index in range(len(user_movie_array)):
-            user, movie = user_movie_array[index]
-            value = U_M_train[user, movie]
+        for index in range(D_value):
+            user, movie, value = U_M_train[index]
             prediction = user_bias[user] + movie_bias[movie] + np.dot(P[user].T, Q[movie])
             error = (value - prediction)
             
