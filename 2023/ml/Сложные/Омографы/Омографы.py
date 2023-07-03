@@ -1,16 +1,16 @@
 import os
 import json
 import re
+import pickle
 # импортируем модуль
 from gensim.models.fasttext import FastText
-import gensim.downloader as download_api
-
-import transformers
-#print(transformers.__version__)
 
 def train_and_save_fastText(train_data, model_path):
     # создание массива
     train_data_list = []
+    for data in train_data:
+        train_data_list.append(data['source'].split())
+        
     for data in train_data:
         train_data_list.append(data['target'].split())
 
@@ -19,7 +19,35 @@ def train_and_save_fastText(train_data, model_path):
     # Сохраним модель в файл
     fastText_model.save(model_path)
     
-
+def train_input_output_vectors(train_data, fastText_model, train_input_path, train_output_path):
+    train_input = []
+    train_output = []
+    # Сохранение обучающего датасета
+    for data in train_data:
+        # Извлекаем строку из JSON
+        source_string = data['source'].split()
+        for word in source_string:
+            vectorizer = fastText_model.wv[word]
+            train_input.append(vectorizer)
+        
+        target_string = data['target'].split()
+        for word in target_string:
+            if has_uppercase(word):
+                vectorizer = fastText_model.wv[word]
+                train_output.append(vectorizer)
+                break
+        
+    # сохарение в файл
+    with open(train_input_path, 'wb') as file:
+        pickle.dump(train_input, file)
+    with open(train_output_path, 'wb') as file:
+        pickle.dump(train_output, file)
+    
+def has_uppercase(array):
+    for element in array:
+        if any(char.isupper() for char in element):
+            return True
+    return False
 
 def main():
     '''
@@ -45,12 +73,26 @@ def main():
 
     # Загрузка модели
     fastText_model = FastText.load(model_path)
-    vectorizer = fastText_model.wv['АДОНИС']
-    print(vectorizer)
+    # vectorizer = fastText_model.wv['АДОНИС']
+    # print(vectorizer)
+    
+    # Создание и сохранение массива в файл
+    train_input_path = os.path.abspath("") + '\\2023\\ml\\Сложные\\Омографы\\train_input.pickle'
+    train_output_path = os.path.abspath("") + '\\2023\\ml\\Сложные\\Омографы\\train_output.pickle'
+    # train_input_output_vectors(train_data, fastText_model, train_input_path, train_output_path)
+    
+    # Загрузка массива из файла
+    with open(train_input_path, 'rb') as file:
+        train_input = pickle.load(file)    
+    with open(train_output_path, 'rb') as file:
+        train_output = pickle.load(file)
+    
+
+    
     
     for data in test_data:
         # Извлекаем строку из JSON
-        source_string = data['source'].replace('%', '%%')
+        source_string = data['source']
         # Используем регулярное выражение для поиска слова с заглавной буквой
         match = re.search(r'\b\w*[А-Я]\w*\b', source_string)
         # Извлекаем слово
@@ -66,7 +108,7 @@ def main():
         # выводим результат для ручной оценки
         print(source_string)
     
-    pass
+
 
 if __name__ == '__main__':
     main()
