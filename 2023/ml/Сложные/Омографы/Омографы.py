@@ -5,6 +5,9 @@ import pickle
 # импортируем модуль
 from gensim.models.fasttext import FastText
 
+from tensorflow.keras.models import Sequential, load_model
+from tensorflow.keras.layers import SimpleRNN, Dense
+
 def train_and_save_fastText(train_data, model_path):
     # создание массива
     train_data_list = []
@@ -26,9 +29,11 @@ def train_input_output_vectors(train_data, fastText_model, train_input_path, tra
     for data in train_data:
         # Извлекаем строку из JSON
         source_string = data['source'].split()
+        vectorizer_array = []
         for word in source_string:
             vectorizer = fastText_model.wv[word]
-            train_input.append(vectorizer)
+            vectorizer_array.append(vectorizer)
+        train_input.append(vectorizer_array)
         
         target_string = data['target'].split()
         for word in target_string:
@@ -42,7 +47,23 @@ def train_input_output_vectors(train_data, fastText_model, train_input_path, tra
         pickle.dump(train_input, file)
     with open(train_output_path, 'wb') as file:
         pickle.dump(train_output, file)
+
+def train_and_save_model(train_input, train_output, model_path):
+    # Создание модели
+    input_dim, output_dim = 100, 100
+    model = Sequential()
+    model.add(SimpleRNN(units=128, input_shape=(None, input_dim)))  # None - переменная длина временных шагов
+    model.add(Dense(units=output_dim))  # output_dim - количество выходных нейронов
+
+    # Компиляция модели
+    model.compile(loss='mean_squared_error', optimizer='adam')
+
+    # Обучение модели
+    model.fit(train_input, train_output, epochs=10)
     
+    # Сохранение модели
+    model.save(model_path)
+
 def has_uppercase(array):
     for element in array:
         if any(char.isupper() for char in element):
@@ -87,20 +108,32 @@ def main():
     with open(train_output_path, 'rb') as file:
         train_output = pickle.load(file)
     
+    model_SimpleRNN_path = os.path.abspath("") + '\\2023\\ml\\Сложные\\Омографы\\model_SimpleRNN_path.h5'
+    train_and_save_model(train_input, train_output, model_SimpleRNN_path)
 
-    
+    # Загрузка модели
+    model_SimpleRNN = load_model(model_SimpleRNN)
     
     for data in test_data:
         # Извлекаем строку из JSON
-        source_string = data['source']
-        # Используем регулярное выражение для поиска слова с заглавной буквой
-        match = re.search(r'\b\w*[А-Я]\w*\b', source_string)
-        # Извлекаем слово
-        word_with_capital = match.group(0)
-        # переводим слово и предложение в нижний регистр
-        lowercase_word = word_with_capital.lower()
-        # ставим ударения с контекстом
-        source_string_lower = source_string.lower() 
+        source_string = data['source'].split()
+        vectorizer_array = []
+        for word in source_string:
+            vectorizer = fastText_model.wv[word]
+            vectorizer_array.append(vectorizer)
+        input.append(vectorizer_array)
+        
+        target_string = data['target'].split()
+        target_vector = ""
+        for word in target_string:
+            if has_uppercase(word):
+                target_vector = fastText_model.wv[word]
+                break
+        
+        similar_words = fastText_model.wv.most_similar([target_vector], topn=10)
+        print(similar_words)
+        
+        output_vector = model_SimpleRNN.predict(input)
 
         
         
