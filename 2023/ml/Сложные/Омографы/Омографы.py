@@ -5,14 +5,13 @@ import pickle
 # импортируем модуль
 from gensim.models.fasttext import FastText
 
-from tensorflow.keras.models import Sequential, load_model
-from tensorflow.keras.layers import SimpleRNN, Dense
-
 def train_and_save_fastText(train_data, model_path):
     # создание массива
     train_data_list = []
+    # max_len = 0 # итоговое значение 291, будем брать +-10 слов
     for data in train_data:
         train_data_list.append(data['source'].split())
+        # max_len = max(max_len, len(data['source'].split()))
         
     for data in train_data:
         train_data_list.append(data['target'].split())
@@ -26,14 +25,48 @@ def train_input_output_vectors(train_data, fastText_model, train_input_path, tra
     train_input = []
     train_output = []
     # Сохранение обучающего датасета
+    index_word = 0
+    
     for data in train_data:
+        index_word += 1
+        if index_word % 1000 == 0:
+            print(index_word)
+            
         # Извлекаем строку из JSON
         source_string = data['source'].split()
         vectorizer_array = []
+        vectorizer_array_output = [0]*(100* (10+1+10))
+        i = 0
+        index_up_word = 0
         for word in source_string:
             vectorizer = fastText_model.wv[word]
             vectorizer_array.append(vectorizer)
-        train_input.append(vectorizer_array)
+            if has_uppercase(word):
+                index_up_word = i
+            i += 1
+        
+        #
+        if index_up_word < 10:
+            for k in range(index_up_word):
+                array = vectorizer_array[k]
+                vectorizer_array_output[10*100 - index_up_word*100 + k*100 : 10*100 - index_up_word*100 + (k+1)*100] = array
+        else:
+            for k in range(10):
+                array = vectorizer_array[k]
+                vectorizer_array_output[k*100 : (k+1)*100] = array
+        #
+        vectorizer_array_output[10*100:11*100] = vectorizer_array[index_up_word]
+        #
+        if index_up_word+10 > len(source_string)-1:
+            for k in range(index_up_word+1, len(source_string)):
+                array = vectorizer_array[k]
+                vectorizer_array_output[10*100 + (k-index_up_word)*100 : 10*100 + (k+1-index_up_word)*100] = array
+        else:
+            for k in range(index_up_word+1, index_up_word+11):
+                array = vectorizer_array[k]
+                vectorizer_array_output[10*100 + (k-index_up_word)*100 : 10*100 + (k+1-index_up_word)*100] = array
+        
+        train_input.append(vectorizer_array_output)
         
         target_string = data['target'].split()
         for word in target_string:
@@ -49,20 +82,7 @@ def train_input_output_vectors(train_data, fastText_model, train_input_path, tra
         pickle.dump(train_output, file)
 
 def train_and_save_model(train_input, train_output, model_path):
-    # Создание модели
-    input_dim, output_dim = 100, 100
-    model = Sequential()
-    model.add(SimpleRNN(units=128, input_shape=(None, input_dim)))  # None - переменная длина временных шагов
-    model.add(Dense(units=output_dim))  # output_dim - количество выходных нейронов
-
-    # Компиляция модели
-    model.compile(loss='mean_squared_error', optimizer='adam')
-
-    # Обучение модели
-    model.fit(train_input, train_output, epochs=10)
-    
-    # Сохранение модели
-    model.save(model_path)
+    pass
 
 def has_uppercase(array):
     for element in array:
@@ -94,13 +114,17 @@ def main():
 
     # Загрузка модели
     fastText_model = FastText.load(model_path)
-    # vectorizer = fastText_model.wv['АДОНИС']
-    # print(vectorizer)
+  
+    # тест выдачи похожих слов
+    # word_vector = fastText_model.wv['августА']
+    # topn = 100  # Количество наиболее похожих слов
+    # similar_words = fastText_model.wv.most_similar([word_vector], topn=topn)
+    # print(similar_words)    
     
     # Создание и сохранение массива в файл
     train_input_path = os.path.abspath("") + '\\2023\\ml\\Сложные\\Омографы\\train_input.pickle'
     train_output_path = os.path.abspath("") + '\\2023\\ml\\Сложные\\Омографы\\train_output.pickle'
-    # train_input_output_vectors(train_data, fastText_model, train_input_path, train_output_path)
+    train_input_output_vectors(train_data, fastText_model, train_input_path, train_output_path)
     
     # Загрузка массива из файла
     with open(train_input_path, 'rb') as file:
@@ -109,10 +133,11 @@ def main():
         train_output = pickle.load(file)
     
     model_SimpleRNN_path = os.path.abspath("") + '\\2023\\ml\\Сложные\\Омографы\\model_SimpleRNN_path.h5'
-    train_and_save_model(train_input, train_output, model_SimpleRNN_path)
+    # В разработке
+    # train_and_save_model(train_input, train_output, model_SimpleRNN_path)
 
     # Загрузка модели
-    model_SimpleRNN = load_model(model_SimpleRNN)
+    # model_SimpleRNN = load_model(model_SimpleRNN)
     
     for data in test_data:
         # Извлекаем строку из JSON
