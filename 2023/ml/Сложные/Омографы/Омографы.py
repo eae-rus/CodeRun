@@ -5,6 +5,8 @@ import re
 import pickle
 # импортируем модуль
 from gensim.models.fasttext import FastText
+# для модели
+from sklearn.linear_model import LinearRegression
 
 def train_and_save_fastText(train_data, model_path):
     # создание массива
@@ -216,40 +218,27 @@ def main():
     # np.save(test_input_path_np, test_input_np)
     test_input_np = np.load(test_input_path_np)
     
-    model_SimpleRNN_path = os.path.abspath("") + '\\2023\\ml\\Сложные\\Омографы\\model_SimpleRNN_path.h5'
-    # В разработке
-    # train_and_save_model(train_input, train_output, model_SimpleRNN_path)
-
-    # Загрузка модели
-    # model_SimpleRNN = load_model(model_SimpleRNN)
+    #------------------------------------
+    # обучение модели
+    model = LinearRegression()
+    model.fit(train_input_np, train_output_np)
     
-    for data in test_data:
-        # Извлекаем строку из JSON
-        source_string = data['source'].split()
-        vectorizer_array = []
-        for word in source_string:
-            vectorizer = fastText_model.wv[word]
-            vectorizer_array.append(vectorizer)
-        input.append(vectorizer_array)
-        
-        target_string = data['target'].split()
-        target_vector = ""
-        for word in target_string:
-            if has_uppercase(word):
-                target_vector = fastText_model.wv[word]
-                break
-        
-        similar_words = fastText_model.wv.most_similar([target_vector], topn=10)
-        print(similar_words)
-        
-        output_vector = model_SimpleRNN.predict(input)
-
-        
-        
-        
-        # выводим результат для ручной оценки
-        print(source_string)
+    answer = []
+    for data in test_input_np:
+        data_test = data.reshape(-1, 1).T
+        prediction = model.predict(data_test)
+        topn = 1  # Количество наиболее похожих слов
+        similar_words = fastText_model.wv.most_similar([prediction[0]], topn=topn)
+        answer.append(similar_words[0][0])
+        # print(similar_words[0][0])   
     
+    # Сохранение массива в текстовый файл
+    answer_path = os.path.abspath("") + '\\2023\\ml\\Сложные\\Омографы\\answer.txt'
+    # Открытие файла для записи
+    with open(answer_path, "w", encoding="utf-8") as file:
+        # Запись каждой строки в файл
+        for string in answer:
+            file.write(string + "\n")
 
 
 if __name__ == '__main__':
