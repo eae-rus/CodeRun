@@ -6,7 +6,8 @@ import pickle
 # импортируем модуль
 from gensim.models.fasttext import FastText
 # для модели
-from sklearn.ensemble import RandomForestRegressor
+import tensorflow as tf
+from tensorflow.keras import layers
 
 def train_and_save_fastText(train_data, model_path):
     # создание массива
@@ -220,14 +221,28 @@ def main():
     
     #------------------------------------
     # обучение модели
-    model = RandomForestRegressor()
-    model.fit(train_input_np, train_output_np)
+    model = tf.keras.Sequential([
+        layers.Dense(1024, activation='relu', input_shape=(2100,)),
+        layers.Dense(1024, activation='sigmoid'),
+        layers.Dense(1024, activation='sigmoid'),
+        layers.Dense(512, activation='relu'),
+        layers.Dense(256, activation='relu'),
+        layers.Dense(100)
+    ])
+    # Компиляция модели
+    model.compile(optimizer='adam', loss='mean_squared_error')
+
+    # Обучение модели
+    model.fit(train_input_np, train_output_np, epochs=300, batch_size=100)
+    
+    neyro_model_path = os.path.abspath("") + '\\2023\\ml\\Сложные\\Омографы\\neyro_model'
+    model.save(neyro_model_path)
     
     answer = []
     for data in test_input_np:
         data_test = data.reshape(-1, 1).T
         prediction = model.predict(data_test)
-        topn = 100  # Количество наиболее похожих слов
+        topn = 1  # Количество наиболее похожих слов
         similar_words = fastText_model.wv.most_similar([prediction[0]], topn=topn)
         answer.append(similar_words[0][0])
         # print(similar_words[0][0])   
