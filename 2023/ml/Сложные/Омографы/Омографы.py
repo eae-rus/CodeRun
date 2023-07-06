@@ -6,7 +6,7 @@ import pickle
 # импортируем модуль
 from gensim.models.fasttext import FastText
 # для модели
-from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
 
 def train_and_save_fastText(train_data, model_path):
     # создание массива
@@ -220,14 +220,14 @@ def main():
     
     #------------------------------------
     # обучение модели
-    model = LinearRegression()
+    model = RandomForestRegressor()
     model.fit(train_input_np, train_output_np)
     
     answer = []
     for data in test_input_np:
         data_test = data.reshape(-1, 1).T
         prediction = model.predict(data_test)
-        topn = 1  # Количество наиболее похожих слов
+        topn = 100  # Количество наиболее похожих слов
         similar_words = fastText_model.wv.most_similar([prediction[0]], topn=topn)
         answer.append(similar_words[0][0])
         # print(similar_words[0][0])   
