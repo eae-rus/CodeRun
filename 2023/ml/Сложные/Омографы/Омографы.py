@@ -87,6 +87,61 @@ def train_input_output_vectors(train_data, fastText_model, train_input_path, tra
     with open(train_output_path, 'wb') as file:
         pickle.dump(train_output, file)
 
+def test_input_vectors(test_data, fastText_model, test_input_path):
+    train_input = []
+    # Сохранение обучающего датасета
+    index_word = 0
+    
+    for data in test_data:
+        index_word += 1
+        if index_word % 10000 == 0:
+            print(index_word)
+        
+        # Извлекаем строку из JSON
+        source_string = data['source'].split()
+        # предварительная обработка source
+        i = 0
+        for word in source_string:
+            if has_uppercase(word):
+                index_up_word = i
+                break
+            i += 1
+        temp = []
+        # до
+        if index_up_word < 10:
+            for _ in range(10 - index_up_word):
+                temp.append(".")
+            for sourse_word in source_string[:index_up_word]:
+                temp.append(sourse_word)
+        else:
+            for sourse_word in source_string[index_up_word - 10 :index_up_word]:
+                temp.append(sourse_word)
+        # слово
+        temp.append(source_string[index_up_word])
+        # после
+        if index_up_word == len(source_string)-1:
+            for _ in range(10):
+                temp.append(".")
+        elif (index_up_word+10) - (len(source_string)-1) > 0:
+            for sourse_word in source_string[index_up_word+1:]:
+                temp.append(sourse_word)
+            for _ in range((index_up_word+10) - (len(source_string)-1)):
+                temp.append(".")
+        else:
+            for sourse_word in source_string[index_up_word + 1 : index_up_word + 11]:
+                temp.append(sourse_word)
+        
+        source_string = temp
+        vectorizer_array = []
+        for word in source_string:
+            vectorizer = fastText_model.wv[word]
+            vectorizer_array.append(vectorizer)
+        train_input.append(vectorizer_array)
+             
+    # сохарение в файл
+    with open(test_input_path, 'wb') as file:
+        pickle.dump(train_input, file)
+
 def train_and_save_model(train_input, train_output, model_path):
     pass
 
@@ -130,16 +185,21 @@ def main():
     # Создание и сохранение массива в файл
     # train_input_path = os.path.abspath("") + '\\2023\\ml\\Сложные\\Омографы\\train_input.pickle'
     # train_output_path = os.path.abspath("") + '\\2023\\ml\\Сложные\\Омографы\\train_output.pickle'
+    # test_input_path = os.path.abspath("") + '\\2023\\ml\\Сложные\\Омографы\\test_input.pickle'
     # train_input_output_vectors(train_data, fastText_model, train_input_path, train_output_path)
+    # test_input_vectors(test_data, fastText_model, test_input_path)
     
     # Загрузка массива из файла
     # with open(train_input_path, 'rb') as file:
     #     train_input = pickle.load(file)    
     # with open(train_output_path, 'rb') as file:
     #     train_output = pickle.load(file)
+    # with open(test_input_path, 'rb') as file:
+    #     test_input = pickle.load(file)
     
-    train_input_path_np = os.path.abspath("") + '\\2023\\ml\\Сложные\\Омографы\\train_input_np'
-    train_output_path_np = os.path.abspath("") + '\\2023\\ml\\Сложные\\Омографы\\train_output_np'
+    train_input_path_np = os.path.abspath("") + '\\2023\\ml\\Сложные\\Омографы\\train_input_np.npy'
+    train_output_path_np = os.path.abspath("") + '\\2023\\ml\\Сложные\\Омографы\\train_output_np.npy'
+    test_input_path_np = os.path.abspath("") + '\\2023\\ml\\Сложные\\Омографы\\test_input_np.npy'
     
     # train_input_np = np.array(train_input)
     # train_input_np = train_input_np.reshape(train_input_np.shape[0], -1)
@@ -150,6 +210,11 @@ def main():
     # train_output_np = train_output_np.reshape(train_output_np.shape[0], -1)
     # np.save(train_output_path_np, train_output_np)
     train_output_np = np.load(train_output_path_np)
+    
+    # test_input_np = np.array(test_input)
+    # test_input_np = test_input_np.reshape(test_input_np.shape[0], -1)
+    # np.save(test_input_path_np, test_input_np)
+    test_input_np = np.load(test_input_path_np)
     
     model_SimpleRNN_path = os.path.abspath("") + '\\2023\\ml\\Сложные\\Омографы\\model_SimpleRNN_path.h5'
     # В разработке
