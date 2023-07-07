@@ -24,7 +24,11 @@ def train_and_save_fastText(train_data, model_path):
     fastText_model = FastText(train_data_list)
     # Сохраним модель в файл
     fastText_model.save(model_path)
-    
+
+def extract_vowels(string):
+    vowels = re.findall('[аеёиоуыэюя]', string, re.IGNORECASE)
+    return ''.join(vowels)
+
 def train_input_output_vectors(train_data, fastText_model, train_input_path, train_output_path):
     train_input = []
     train_output = []
@@ -36,53 +40,59 @@ def train_input_output_vectors(train_data, fastText_model, train_input_path, tra
         if index_word % 10000 == 0:
             print(index_word)
         
-        # Извлекаем строку из JSON
-        source_string = data['source'].split()
-        # предварительная обработка source
-        i = 0
-        for word in source_string:
-            if has_uppercase(word):
-                index_up_word = i
-                break
-            i += 1
-        temp = []
-        # до
-        if index_up_word < 10:
-            for _ in range(10 - index_up_word):
-                temp.append(".")
-            for sourse_word in source_string[:index_up_word]:
-                temp.append(sourse_word)
-        else:
-            for sourse_word in source_string[index_up_word - 10 :index_up_word]:
-                temp.append(sourse_word)
-        # слово
-        temp.append(source_string[index_up_word])
-        # после
-        if index_up_word == len(source_string)-1:
-            for _ in range(10):
-                temp.append(".")
-        elif (index_up_word+10) - (len(source_string)-1) > 0:
-            for sourse_word in source_string[index_up_word+1:]:
-                temp.append(sourse_word)
-            for _ in range((index_up_word+10) - (len(source_string)-1)):
-                temp.append(".")
-        else:
-            for sourse_word in source_string[index_up_word + 1 : index_up_word + 11]:
-                temp.append(sourse_word)
-        
-        source_string = temp
-        vectorizer_array = []
-        for word in source_string:
-            vectorizer = fastText_model.wv[word]
-            vectorizer_array.append(vectorizer)
-        train_input.append(vectorizer_array)
+        # # Извлекаем строку из JSON
+        # source_string = data['source'].split()
+        # # предварительная обработка source
+        # i = 0
+        # for word in source_string:
+        #     if has_uppercase(word):
+        #         index_up_word = i
+        #         break
+        #     i += 1
+        # temp = []
+        # # до
+        # if index_up_word < 10:
+        #     for _ in range(10 - index_up_word):
+        #         temp.append(".")
+        #     for sourse_word in source_string[:index_up_word]:
+        #         temp.append(sourse_word)
+        # else:
+        #     for sourse_word in source_string[index_up_word - 10 :index_up_word]:
+        #         temp.append(sourse_word)
+        # # слово
+        # temp.append(source_string[index_up_word])
+        # # после
+        # if index_up_word == len(source_string)-1:
+        #     for _ in range(10):
+        #         temp.append(".")
+        # elif (index_up_word+10) - (len(source_string)-1) > 0:
+        #     for sourse_word in source_string[index_up_word+1:]:
+        #         temp.append(sourse_word)
+        #     for _ in range((index_up_word+10) - (len(source_string)-1)):
+        #         temp.append(".")
+        # else:
+        #     for sourse_word in source_string[index_up_word + 1 : index_up_word + 11]:
+        #         temp.append(sourse_word)
+        # 
+        # source_string = temp
+        # vectorizer_array = []
+        # for word in source_string:
+        #     vectorizer = fastText_model.wv[word]
+        #     vectorizer_array.append(vectorizer)
+        # train_input.append(vectorizer_array)
         
         target_string = data['target'].split()
+        vowel_array = [0 for _ in range(6)] # определено, что максимум 6 глассных в исследуюмых текстах
         for word in target_string:
             if has_uppercase(word):
-                vectorizer = fastText_model.wv[word]
-                train_output.append(vectorizer)
-                break
+                vowels_word = extract_vowels(word)
+                i = 0
+                for vowel in vowels_word:
+                    if has_uppercase(vowel):
+                        vowel_array[i] = 1
+                        train_output.append(vowel_array)
+                        break
+                    i += 1
         
     # сохарение в файл
     with open(train_input_path, 'wb') as file:
@@ -223,20 +233,22 @@ def main():
     # обучение модели
     model = tf.keras.Sequential([
         layers.Dense(1024, activation='relu', input_shape=(2100,)),
-        layers.Dense(1024, activation='sigmoid'),
-        layers.Dense(1024, activation='sigmoid'),
         layers.Dense(512, activation='relu'),
         layers.Dense(256, activation='relu'),
-        layers.Dense(100)
+        layers.Dense(256, activation='relu'),
+        layers.Dense(128, activation='relu'),
+        layers.Dense(128, activation='relu'),
+        layers.Dense(64, activation='relu'),
+        layers.Dense(64, activation='relu'),
+        layers.Dense(32, activation='relu'),
+        layers.Dense(16, activation='relu'),
+        layers.Dense(6, activation='softmax')
     ])
     # Компиляция модели
     model.compile(optimizer='adam', loss='mean_squared_error')
 
     # Обучение модели
-    model.fit(train_input_np, train_output_np, epochs=300, batch_size=100)
-    
-    neyro_model_path = os.path.abspath("") + '\\2023\\ml\\Сложные\\Омографы\\neyro_model'
-    model.save(neyro_model_path)
+    model.fit(train_input_np, train_output_np, epochs=30, batch_size=256)
     
     answer = []
     for data in test_input_np:
@@ -254,6 +266,9 @@ def main():
         # Запись каждой строки в файл
         for string in answer:
             file.write(string + "\n")
+
+    neyro_model_path = os.path.abspath("") + '\\2023\\ml\\Сложные\\Омографы\\neyro_model'
+    model.save(neyro_model_path)
 
 
 if __name__ == '__main__':
