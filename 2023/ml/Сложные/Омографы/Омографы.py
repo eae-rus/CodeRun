@@ -236,23 +236,26 @@ def main():
     #------------------------------------
     # обучение модели
     model = tf.keras.Sequential([
-        layers.Dense(2048, activation='relu', input_shape=(2100,)),
-        layers.Dense(1024, activation='relu'),
-        layers.Dense(1024, activation='relu'),
+        layers.Conv1D(512, 100, strides=100, activation='relu', input_shape=(2100, 1)),
+        layers.Dropout(0.2),
+        layers.Conv1D(64, 3, activation='relu'),
+        layers.Dropout(1/16),
+        layers.Flatten(),
         layers.Dense(512, activation='relu'),
-        layers.Dense(512, activation='relu'),
-        layers.Dense(256, activation='relu'),
-        layers.Dense(256, activation='relu'),
+        layers.Dropout(0.2),
         layers.Dense(128, activation='relu'),
+        layers.Dropout(0.1),
         layers.Dense(64, activation='relu'),
+        layers.Dropout(0.1),
         layers.Dense(32, activation='relu'),
+        layers.Dropout(0.1),
         layers.Dense(6, activation='softmax')
     ])
     # Компиляция модели
     model.compile(optimizer='adam', loss='mean_squared_error')
 
     # Обучение модели
-    model.fit(train_input_np, train_output_np, epochs=50, batch_size=256)
+    model.fit(train_input_np, train_output_np, epochs=100, batch_size=256)
     
     answer = []
     for data, test_text in zip(test_input_np, test_data):
