@@ -241,7 +241,11 @@ def main():
         layers.Conv1D(64, 3, activation='relu'),
         layers.Dropout(1/16),
         layers.Flatten(),
+        layers.Dense(1024, activation='relu'),
+        layers.Dropout(0.2),
         layers.Dense(512, activation='relu'),
+        layers.Dropout(0.2),
+        layers.Dense(256, activation='relu'),
         layers.Dropout(0.2),
         layers.Dense(128, activation='relu'),
         layers.Dropout(0.1),
@@ -255,12 +259,12 @@ def main():
     model.compile(optimizer='adam', loss='mean_squared_error')
 
     # Обучение модели
-    model.fit(train_input_np, train_output_np, epochs=100, batch_size=256)
+    model.fit(train_input_np, train_output_np, epochs=2, batch_size=256)
     
     answer = []
     for data, test_text in zip(test_input_np, test_data):
         data_test = data.reshape(-1, 1).T
-        prediction = model.predict(data_test)
+        prediction = model.predict(data_test, verbose=0)
         word_answer = ''
         for word in test_text['source'].split():
             if has_uppercase(word):
